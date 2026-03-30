@@ -1,0 +1,385 @@
+{
+    "departments": [
+      {
+        "id": "cse",
+        "name": "Computer Science & Engineering",
+        "short_name": "CSE",
+        "school": "School of Computing",
+        "building": "Tech Park",
+        "campus": "Annexure-I",
+        "floors": "Multiple floors",
+        "classrooms": ["TP 101-1506"],
+        "total_classrooms": 84,
+        "programs": [
+          {
+            "name": "B.Tech Computer Science & Engineering",
+            "duration": "4 years",
+            "specializations": ["AI & Machine Learning", "Data Science", "Cyber Security", "Cloud Computing"]
+          },
+          {
+            "name": "M.Tech Computer Science",
+            "duration": "2 years"
+          }
+        ],
+        "facilities": [
+          "Advanced Computing Labs",
+          "AI/ML Lab",
+          "Cyber Security Lab",
+          "Software Engineering Lab",
+          "Project Labs"
+        ],
+        "hod": {
+          "name": "[To be updated]",
+          "office": "Tech Park - [Floor/Room]",
+          "email": "hod.cse@srmist.edu.in",
+          "phone": "+91-XXXXXXXXXX"
+        }
+      },
+      {
+        "id": "it",
+        "name": "Information Technology",
+        "short_name": "IT",
+        "school": "School of Computing",
+        "building": "Tech Park",
+        "campus": "Annexure-I",
+        "programs": [
+          {
+            "name": "B.Tech Information Technology",
+            "duration": "4 years"
+          }
+        ],
+        "facilities": [
+          "Networking Labs",
+          "Database Labs",
+          "Web Development Labs"
+        ],
+        "hod": {
+          "name": "[To be updated]",
+          "office": "Tech Park",
+          "email": "hod.it@srmist.edu.in"
+        }
+      },
+      {
+        "id": "mech",
+        "name": "Mechanical Engineering",
+        "short_name": "MECH",
+        "school": "School of Mechanical Engineering",
+        "building": "Mechanical A, B, C, D, E Blocks",
+        "campus": "Main Campus",
+        "classrooms": ["M8-M15 in Mech-A Block"],
+        "total_classrooms": 8,
+        "programs": [
+          {
+            "name": "B.Tech Mechanical Engineering",
+            "duration": "4 years",
+            "specializations": ["Automotive", "Thermal", "Design", "Manufacturing"]
+          },
+          {
+            "name": "M.Tech Mechanical",
+            "duration": "2 years"
+          }
+        ],
+        "facilities": [
+          "CAD/CAM Labs",
+          "CNC Workshop",
+          "Fluid Mechanics Lab",
+          "Thermal Lab (with Open Well)",
+          "Material Testing Lab",
+          "Mechanical Hanger (G+1, 28,554 sq.ft)"
+        ],
+        "special_labs": [
+          {
+            "name": "Mechanical Hanger",
+            "area_sqft": 28554,
+            "description": "Large workshop and testing facility"
+          },
+          {
+            "name": "Thermal Lab",
+            "water_source": "Dedicated well (20' dia, 30' depth)"
+          }
+        ],
+        "hod": {
+          "name": "[To be updated]",
+          "office": "Mech-A Block",
+          "email": "hod.mech@srmist.edu.in"
+        }
+      },
+      {
+        "id": "auto",
+        "name": "Automobile Engineering",
+        "short_name": "AUTO",
+        "school": "School of Mechanical Engineering",
+        "building": "Automobile Block",
+        "campus": "Main Campus",
+        "floors": "G+2",
+        "area_sqft": 33963,
+        "programs": [
+          {
+            "name": "B.Tech Automobile Engineering",
+            "duration": "4 years"
+          }
+        ],
+        "facilities": [
+          "Vehicle Testing Lab",
+          "Engine Lab",
+          "Chassis Dynamometer",
+          "Automotive Electronics Lab"
+        ]
+      },
+      {
+        "id": "aero",
+        "name": "Aerospace Engineering",
+        "short_name": "AERO",
+        "school": "School of Aeronautics",
+        "building": "Aerospace Hanger",
+        "campus": "Main Campus",
+        "floors": "G+1",
+        "area_sqft": 28238,
+        "programs": [
+          {
+            "name": "B.Tech Aerospace Engineering",
+            "duration": "4 years"
+          }
+        ],
+        "facilities": [
+          "Wind Tunnel",
+          "Flight Simulators",
+          "Aircraft Maintenance Lab",
+          "Avionics Lab"
+        ]
+      },
+      {
+        "id": "eee",
+        "name": "Electrical & Electronics Engineering",
+        "short_name": "EEE",
+        "school": "School of Electrical Sciences",
+        "building": "ES Block",
+        "campus": "Main Campus",
+        "floors": "G+3",
+        "area_sqft": 55483,
+        "classrooms": ["ESB311-ESB409"],
+        "total_classrooms": 8,
+        "programs": [
+          {
+            "name": "B.Tech Electrical & Electronics Engineering",
+            "duration": "4 years"
+          }
+        ],
+        "facilities": [
+          "Power Systems Lab",
+          "Electrical Machines Lab",
+          "Control Systems Lab",
+          "High Voltage Lab"
+        ],
+        "hod": {
+          "name": "[To be updated]",
+          "office": "ES Block",
+          "email": "hod.eee@srmist.edu.in"
+        }
+      },
+      {
+        "id": "ece",
+        "name": "Electronics & Communication Engineering",
+        "short_name": "ECE",
+        "school": "School of Electronics Engineering",
+        "building": "ES Block",
+        "campus": "Main Campus",
+        "floors": "G+3",
+        "programs": [
+          {
+            "name": "B.Tech Electronics & Communication Engineering",
+            "duration": "4 years"
+          }
+        ],
+        "facilities": [
+          "Communication Lab",
+          "VLSI Lab",
+          "Microprocessor Lab",
+          "Signal Processing Lab"
+        ]
+      },
+      {
+        "id": "civil",
+        "name": "Civil Engineering",
+        "short_name": "CIVIL",
+        "school": "School of Civil Engineering",
+        "building": "Old Library Block",
+        "campus": "Main Campus",
+        "floors": "G+3",
+        "area_sqft": 17736,
+        "classrooms": ["L201-L304"],
+        "total_classrooms": 8,
+        "programs": [
+          {
+            "name": "B.Tech Civil Engineering",
+            "duration": "4 years"
+          }
+        ],
+        "facilities": [
+          "Structural Testing Lab (G+1, 21,329 sq.ft)",
+          "Surveying Lab",
+          "Concrete Technology Lab",
+          "Geotechnical Lab"
+        ],
+        "special_labs": [
+          {
+            "name": "Structural Lab & Testing Lab",
+            "area_sqft": 21329,
+            "description": "Large-scale structural testing facility"
+          }
+        ]
+      },
+      {
+        "id": "biotech",
+        "name": "Biotechnology",
+        "short_name": "BIOTECH",
+        "school": "School of Bioengineering",
+        "building": "Bio Tech Block",
+        "campus": "Annexure-I",
+        "floors": "G+6",
+        "area_sqft": 120554,
+        "classrooms": ["B101-B704B"],
+        "total_classrooms": 28,
+        "programs": [
+          {
+            "name": "B.Tech Biotechnology",
+            "duration": "4 years"
+          },
+          {
+            "name": "M.Tech Biotechnology",
+            "duration": "2 years"
+          }
+        ],
+        "facilities": [
+          "Microbiology Lab",
+          "Genetic Engineering Lab",
+          "Fermentation Lab",
+          "Tissue Culture Lab",
+          "Research Labs",
+          "RO Plant (1000L capacity)"
+        ],
+        "hod": {
+          "name": "[To be updated]",
+          "office": "Bio Tech Block",
+          "email": "hod.biotech@srmist.edu.in"
+        }
+      },
+      {
+        "id": "mba",
+        "name": "Management Studies",
+        "short_name": "MBA",
+        "school": "School of Management",
+        "building": "MBA Block",
+        "campus": "Annexure-I",
+        "floors": "G+4",
+        "area_sqft": 66933,
+        "classrooms": ["M003-M410"],
+        "total_classrooms": 24,
+        "programs": [
+          {
+            "name": "MBA",
+            "duration": "2 years",
+            "specializations": ["Finance", "Marketing", "HR", "Operations", "International Business"]
+          }
+        ],
+        "facilities": [
+          "Case Study Rooms",
+          "Seminar Halls",
+          "Computer Lab",
+          "Library",
+          "Bloomberg Terminal"
+        ],
+        "hod": {
+          "name": "[To be updated]",
+          "office": "MBA Block",
+          "email": "hod.mba@srmist.edu.in"
+        }
+      },
+      {
+        "id": "arch",
+        "name": "Architecture",
+        "short_name": "B.ARCH",
+        "school": "School of Architecture",
+        "building": "B.Arch Block (with Annexures A & B)",
+        "campus": "Annexure-I",
+        "floors": "G+5",
+        "total_area_sqft": 68877,
+        "classrooms": ["A001-MA302"],
+        "total_classrooms": 15,
+        "programs": [
+          {
+            "name": "B.Arch",
+            "duration": "5 years"
+          }
+        ],
+        "facilities": [
+          "Design Studios with Drawing Tables",
+          "Model Making Lab",
+          "Computer Aided Design Lab",
+          "Material Library",
+          "Architecture Workshop"
+        ],
+        "special_features": [
+          "Design Tables (40 per studio)",
+          "Drawing Boards",
+          "Large Studio Spaces"
+        ]
+      },
+      {
+        "id": "fsh",
+        "name": "Faculty of Science & Humanities",
+        "short_name": "FS&H",
+        "school": "Faculty of Science & Humanities",
+        "building": "University Building + Various",
+        "campus": "Multiple",
+        "classrooms": ["620, 702-1119 in UB"],
+        "total_classrooms": 14,
+        "departments": [
+          "Physics",
+          "Chemistry",
+          "Mathematics",
+          "English",
+          "Social Sciences"
+        ],
+        "facilities": [
+          "Physics Labs",
+          "Chemistry Labs",
+          "Language Labs"
+        ],
+        "description": "Provides foundational courses for all engineering students"
+      }
+    ],
+  
+    "cross_cutting_facilities": {
+      "basic_engineering_lab": {
+        "name": "Basic Engineering Lab (BEL)",
+        "building": "Basic Engineering Lab",
+        "campus": "Annexure-I",
+        "floors": "G+5",
+        "area_sqft": 80842,
+        "serves": "All First Year Engineering Students",
+        "facilities": [
+          "Physics Lab",
+          "Chemistry Lab",
+          "Engineering Graphics Lab",
+          "Basic Workshop",
+          "Engineering Mechanics Lab"
+        ],
+        "ro_plant": true
+      },
+      "raman_research_park": {
+        "name": "Sir C.V. Raman Research Park",
+        "building": "Raman Research Park",
+        "campus": "Annexure-I",
+        "floors": "G+9",
+        "area_sqft": 81727,
+        "serves": "All Departments - Research",
+        "facilities": [
+          "Advanced Research Labs",
+          "Incubation Center",
+          "Innovation Hub",
+          "Collaborative Workspaces"
+        ]
+      }
+    }
+  }

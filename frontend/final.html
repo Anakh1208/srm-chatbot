@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kivy - SRM University Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --srm-blue: #1e3c72;
+            --srm-light-blue: #2a5298;
+            --accent-purple: #6c5ce7;
+            --bg-gray: #f5f7fb;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden; /* Prevents body scroll */
+        }
+
+        .chat-container {
+            width: 95%; max-width: 450px; height: 90vh;
+            background: white; border-radius: 25px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            display: flex; flex-direction: column;
+            position: relative; overflow: hidden;
+        }
+
+        /* --- HEADER --- */
+        .chat-header {
+            background: linear-gradient(135deg, var(--srm-blue) 0%, var(--srm-light-blue) 100%);
+            color: white; padding: 20px; text-align: center; flex-shrink: 0;
+        }
+        .bot-avatar {
+            width: 55px; height: 55px; background: white; border-radius: 50%;
+            margin: 0 auto 10px; display: flex; align-items: center; justify-content: center;
+            font-size: 28px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .chat-header h1 { font-size: 24px; font-weight: 700; }
+        .chat-header p { font-size: 12px; opacity: 0.8; }
+        
+        .logout-btn {
+            position: absolute; top: 15px; right: 15px;
+            background: rgba(255, 255, 255, 0.2); border: 1px solid white;
+            color: white; padding: 5px 12px; border-radius: 15px;
+            font-size: 11px; cursor: pointer; display: none;
+        }
+
+        /* --- QUICK ACTIONS (SCROLLABLE) --- */
+        .quick-actions-bar {
+            background: white; border-bottom: 1px solid #eee; padding: 10px;
+            flex-shrink: 0; display: none; /* Hidden until login */
+        }
+        .action-scroll {
+            display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px;
+            scrollbar-width: none;
+        }
+        .action-scroll::-webkit-scrollbar { display: none; }
+        .pill {
+            padding: 8px 15px; background: #f0f4ff; border: 1px solid #dce4ff;
+            border-radius: 20px; font-size: 12px; color: var(--srm-light-blue);
+            white-space: nowrap; cursor: pointer; transition: 0.3s;
+        }
+        .pill:hover { background: var(--srm-blue); color: white; }
+
+        /* --- CHAT AREA (SCROLLABLE) --- */
+        .chat-messages {
+            flex: 1; padding: 20px; overflow-y: auto; background: var(--bg-gray);
+            display: flex; flex-direction: column;
+        }
+
+        .welcome-screen { text-align: center; margin-bottom: 20px; }
+        .feature-card {
+            background: white; border: 2px solid #e0e6ed; padding: 15px;
+            border-radius: 15px; margin-bottom: 10px; cursor: pointer;
+            text-align: left; display: flex; align-items: center; gap: 12px;
+            color: #444; font-weight: 500; transition: 0.2s;
+        }
+        .feature-card:hover { border-color: var(--accent-purple); background: #f9f8ff; transform: translateY(-2px); }
+
+        .message { margin-bottom: 15px; display: flex; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
+        .message.user { justify-content: flex-end; }
+        .message-bubble {
+            max-width: 80%; padding: 12px 16px; border-radius: 18px;
+            font-size: 14px; line-height: 1.4; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .message.user .message-bubble {
+            background: var(--accent-purple); color: white; border-bottom-right-radius: 4px;
+        }
+        .message.bot .message-bubble {
+            background: white; color: #333; border-bottom-left-radius: 4px;
+        }
+
+        /* --- INPUT AREA --- */
+        .chat-input-area {
+            padding: 15px; background: white; border-top: 1px solid #eee;
+            display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+        }
+        .input-box {
+            flex: 1; padding: 12px 20px; border: 2px solid #e0e6ed;
+            border-radius: 25px; outline: none; font-size: 14px; transition: 0.3s;
+        }
+        .input-box:focus { border-color: var(--accent-purple); }
+        .send-btn {
+            background: var(--accent-purple); color: white; border: none;
+            width: 45px; height: 45px; border-radius: 50%;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 18px; transition: 0.3s;
+        }
+        .send-btn:hover { transform: scale(1.1); background: var(--srm-blue); }
+
+        .typing { font-size: 12px; color: #888; margin-bottom: 10px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="chat-header">
+        <button id="logoutBtn" class="logout-btn" onclick="logout()">Logout</button>
+        <div class="bot-avatar">🤖</div>
+        <h1>Kivy</h1>
+        <p>SRM University Assistant</p>
+    </div>
+
+    <div class="quick-actions-bar" id="quickActions">
+        <div class="action-scroll">
+            <div class="pill" onclick="autoQuery('Programs')">📚 Programs</div>
+            <div class="pill" onclick="autoQuery('Admissions')">📝 Admissions</div>
+            <div class="pill" onclick="autoQuery('Campus')">🏫 Campus</div>
+            <div class="pill" onclick="autoQuery('Placements')">💼 Placements</div>
+            <div class="pill" onclick="autoQuery('Faculty')">👨‍🏫 Faculty</div>
+        </div>
+    </div>
+
+    <div class="chat-messages" id="messageDisplay">
+        <div id="welcomeContent" style="display:none;">
+            <div class="welcome-screen">
+                <p style="color: #666; font-size: 14px; margin-bottom: 15px;">How can I help you today?</p>
+                <div class="feature-card" onclick="autoQuery('Programs & Courses')"><span>📚</span> Programs & Courses</div>
+                <div class="feature-card" onclick="autoQuery('Admission Process')"><span>📝</span> Admission Process</div>
+                <div class="feature-card" onclick="autoQuery('Campus Life')"><span>🏫</span> Campus Life</div>
+                <div class="feature-card" onclick="autoQuery('Placement Records')"><span>💼</span> Placement Records</div>
+            </div>
+        </div>
+        <div class="typing" id="typing">Kivy is typing...</div>
+    </div>
+
+    <div class="chat-input-area">
+        <input type="text" id="mainInput" class="input-box" placeholder="Type your message here..." autocomplete="off">
+        <button class="send-btn" onclick="handleLogic()"><i class="fas fa-paper-plane"></i></button>
+    </div>
+</div>
+
+<script>
+    const API_URL = 'http://localhost:8001/chat';
+    let isAuth = localStorage.getItem('srm_auth') === 'true';
+    let authStep = 'email';
+
+    const display = document.getElementById('messageDisplay');
+    const input = document.getElementById('mainInput');
+    const typing = document.getElementById('typing');
+
+    function addMessage(text, side) {
+        const msg = document.createElement('div');
+        msg.className = `message ${side}`;
+        msg.innerHTML = `<div class="message-bubble">${text}</div>`;
+        display.insertBefore(msg, typing);
+        display.scrollTop = display.scrollHeight;
+    }
+
+    function handleLogic() {
+        const val = input.value.trim();
+        if(!val) return;
+
+        if(!isAuth) {
+            handleAuth(val);
+        } else {
+            handleChat(val);
+        }
+        input.value = '';
+    }
+
+    // --- AUTH FLOW ---
+    function handleAuth(val) {
+        addMessage(val, 'user');
+        if(authStep === 'email') {
+            authStep = 'phone';
+            setTimeout(() => addMessage("Got it. Now please enter your mobile number.", 'bot'), 600);
+        } else if(authStep === 'phone') {
+            authStep = 'otp';
+            setTimeout(() => addMessage("Sending OTP... Enter <strong>123456</strong> to verify.", 'bot'), 600);
+        } else if(authStep === 'otp' && val === '123456') {
+            isAuth = true;
+            localStorage.setItem('srm_auth', 'true');
+            initChat();
+        } else {
+            addMessage("Invalid OTP. Try again!", 'bot');
+        }
+    }
+
+    // --- CHAT FLOW ---
+    async function handleChat(val) {
+        addMessage(val, 'user');
+        document.getElementById('welcomeContent').style.display = 'none';
+        typing.style.display = 'block';
+        display.scrollTop = display.scrollHeight;
+
+        try {
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({query: val})
+            });
+            const data = await res.json();
+            typing.style.display = 'none';
+            addMessage(data.answer, 'bot');
+        } catch (e) {
+            typing.style.display = 'none';
+            addMessage("Server Error. Is your backend running on 8001?", 'bot');
+        }
+    }
+
+    function autoQuery(q) {
+        input.value = q;
+        handleLogic();
+    }
+
+    function initChat() {
+        // Clear login messages
+        const msgs = display.querySelectorAll('.message');
+        msgs.forEach(m => m.remove());
+        
+        document.getElementById('quickActions').style.display = 'block';
+        document.getElementById('logoutBtn').style.display = 'block';
+        document.getElementById('welcomeContent').style.display = 'block';
+        input.placeholder = "Ask Kivy anything...";
+        addMessage("Verification Successful! How can I help you with SRM University?", 'bot');
+    }
+
+    function logout() {
+        localStorage.clear();
+        location.reload();
+    }
+
+    window.onload = () => {
+        if(isAuth) {
+            initChat();
+        } else {
+            addMessage("Hello! 👋 I'm Kivy. Please enter your email to get started.", 'bot');
+        }
+    };
+
+    input.addEventListener('keypress', (e) => { if(e.key === 'Enter') handleLogic(); });
+</script>
+
+</body>
+</html>

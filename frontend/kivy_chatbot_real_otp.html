@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kivy - SRM University Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .chat-container {
+            width: 95%;
+            max-width: 450px;
+            height: 90vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        .chat-header h1 { font-size: 24px; margin-bottom: 5px; }
+        .chat-header p { font-size: 14px; opacity: 0.9; }
+        
+        /* Logout Button Style */
+        .logout-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid white;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: none;
+            z-index: 10;
+        }
+        .logout-btn:hover {
+            background: white;
+            color: #764ba2;
+            transform: scale(1.05);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .message.bot { justify-content: flex-start; }
+        .message.user { justify-content: flex-end; }
+        .message-content {
+            max-width: 75%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        .message.bot .message-content {
+            background: white;
+            color: #333;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        .input-container {
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+        }
+        #userInput {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        #userInput:focus { border-color: #667eea; }
+        #sendBtn {
+            width: 45px;
+            height: 45px;
+            border: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #sendBtn:hover { transform: scale(1.1); }
+        
+        .typing-indicator {
+            display: none;
+            padding: 10px 15px;
+            background: white;
+            border-radius: 18px;
+            width: fit-content;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+        .typing-indicator span {
+            height: 8px; width: 8px; background: #667eea;
+            border-radius: 50%; display: inline-block;
+            margin: 0 2px; animation: typing 1.4s infinite;
+        }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #4caf50;
+            color: white;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-top: 8px;
+        }
+        .quick-btn {
+            padding: 8px 15px;
+            background: #f0f0f0;
+            border: 2px solid #667eea;
+            color: #667eea;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+            display: inline-block;
+            margin: 5px;
+        }
+        .quick-btn:hover { background: #667eea; color: white; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #667eea; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <button id="logoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            <h1>🎓 Kivy</h1>
+            <p>SRM University Assistant</p>
+            <div id="userStatus" style="display: none;"></div>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <div class="typing-indicator" id="typingIndicator">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        
+        <div class="input-container">
+            <input type="text" id="userInput" placeholder="Type your message..." autocomplete="off">
+            <button id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:8001';
+        
+        const authState = {
+            isAuthenticated: false,
+            step: 'welcome',
+            email: null,
+            phone: null,
+            userName: null
+        };
+
+        const chatMessages = document.getElementById('chatMessages');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const userStatus = document.getElementById('userStatus');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        function checkExistingAuth() {
+            const savedAuth = localStorage.getItem('srmChatAuth');
+            if (savedAuth) {
+                const auth = JSON.parse(savedAuth);
+                authState.isAuthenticated = true;
+                authState.email = auth.email;
+                authState.phone = auth.phone;
+                authState.userName = auth.userName;
+                authState.step = 'authenticated';
+                
+                showUserStatus();
+                addBotMessage(`Welcome back, ${authState.userName}! 😊\nHow can I help you today?`, true);
+                return true;
+            }
+            return false;
+        }
+
+        function showUserStatus() {
+            userStatus.style.display = 'block';
+            userStatus.innerHTML = `<span class="status-badge">✓ Verified: ${authState.email}</span>`;
+            logoutBtn.style.display = 'block'; // Show logout button
+        }
+
+        function logoutUser() {
+            localStorage.removeItem('srmChatAuth');
+            location.reload(); // Refresh resets all states
+        }
+
+        logoutBtn.addEventListener('click', logoutUser);
+
+        function addMessage(text, isBot = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isBot ? 'bot' : 'user'}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = text.replace(/\n/g, '<br>');
+            
+            messageDiv.appendChild(contentDiv);
+            chatMessages.insertBefore(messageDiv, typingIndicator);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function addBotMessage(text, instant = false) {
+            if (!instant) {
+                typingIndicator.style.display = 'block';
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                setTimeout(() => {
+                    typingIndicator.style.display = 'none';
+                    addMessage(text, true);
+                }, 1200);
+            } else {
+                addMessage(text, true);
+            }
+        }
+
+        async function handleUserInput(message = null) {
+            const input = message || userInput.value.trim();
+            if (!input) return;
+            
+            if (!message) {
+                addMessage(input, false);
+                userInput.value = '';
+            }
+            
+            if (!authState.isAuthenticated) {
+                switch(authState.step) {
+                    case 'welcome':
+                        authState.step = 'email';
+                        addBotMessage("Please enter your email address to continue:");
+                        break;
+                    case 'email':
+                        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input)) {
+                            addBotMessage("Please enter a valid email address:");
+                            return;
+                        }
+                        authState.email = input;
+                        authState.userName = input.split('@')[0];
+                        authState.step = 'phone';
+                        addBotMessage(`Thanks! Now enter your 10-digit mobile number:`);
+                        break;
+                    case 'phone':
+                        if (!/^[6-9]\d{9}$/.test(input)) {
+                            addBotMessage("Please enter a valid 10-digit number:");
+                            return;
+                        }
+                        authState.phone = input;
+                        authState.step = 'sending_otp';
+                        addBotMessage("📱 Sending OTP...");
+                        
+                        // Fake API call for demo, replace with your fetch
+                        setTimeout(() => {
+                            authState.step = 'otp';
+                            addBotMessage(`🔑 Your OTP is: <strong>123456</strong>\n(In production, this comes via SMS)`);
+                        }, 1000);
+                        break;
+                    case 'otp':
+                        if (input === '123456') { // Fixed OTP for demo
+                            authState.isAuthenticated = true;
+                            authState.step = 'authenticated';
+                            localStorage.setItem('srmChatAuth', JSON.stringify({
+                                email: authState.email,
+                                phone: authState.phone,
+                                userName: authState.userName
+                            }));
+                            showUserStatus();
+                            addBotMessage(`🎉 Verified! Welcome ${authState.userName}. Ask me anything about SRM!`);
+                        } else {
+                            addBotMessage("❌ Incorrect OTP. Try again:");
+                        }
+                        break;
+                }
+            } else {
+                // Main Chat Logic
+                typingIndicator.style.display = 'block';
+                try {
+                    const response = await fetch(`${API_URL}/chat`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query: input })
+                    });
+                    const data = await response.json();
+                    typingIndicator.style.display = 'none';
+                    addMessage(data.answer, true);
+                } catch (e) {
+                    typingIndicator.style.display = 'none';
+                    addMessage("Connection error. Is the server running?", true);
+                }
+            }
+        }
+
+        sendBtn.addEventListener('click', () => handleUserInput());
+        userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleUserInput(); });
+
+        window.addEventListener('load', () => {
+            if (!checkExistingAuth()) {
+                setTimeout(() => {
+                    addBotMessage("Hello! 👋 I'm Kivy, your SRM Assistant.\nTo start, I'll need to verify your identity.", true);
+                    setTimeout(() => {
+                        const btn = document.createElement('button');
+                        btn.className = 'quick-btn';
+                        btn.textContent = "Start Verification 🚀";
+                        btn.onclick = () => handleUserInput("start");
+                        chatMessages.lastElementChild.previousElementSibling.appendChild(btn);
+                    }, 1000);
+                }, 500);
+            }
+        });
+    </script>
+</body>
+</html>

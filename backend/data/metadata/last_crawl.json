@@ -1,0 +1,13 @@
+{
+  "crawl_date": "2026-02-02T19:53:44.358478",
+  "start_url": "https://www.srmist.edu.in",
+  "total_pages_scraped": 50,
+  "total_pages_visited": 50,
+  "statistics": {
+    "total_pages": 50,
+    "total_content_length": 523453,
+    "average_content_length": 10469.06,
+    "unique_titles": 50,
+    "total_visited": 50
+  }
+}

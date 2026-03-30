@@ -1,0 +1,12 @@
+# Vector DB
+*.pkl
+*.npy
+*.faiss
+
+# Data folders
+backend/data/vectorstore/
+data/vectorstore/
+scripts/data/vectorstore/
+
+# Output / temp
+OUTPUT/

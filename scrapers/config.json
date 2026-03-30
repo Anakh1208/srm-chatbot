@@ -1,0 +1,50 @@
+{
+  "scraping_config": {
+    "start_url": "https://www.srmist.edu.in",
+    "max_pages": 100,
+    "max_depth": 3,
+    "delay_between_requests": 1.0,
+    "timeout": 10,
+    "output_file": "../data/raw/scraped_data.json"
+  },
+  
+  "target_sections": {
+    "description": "Specific sections of the university website to prioritize",
+    "urls": [
+      "https://www.srmist.edu.in/admissions",
+      "https://www.srmist.edu.in/academics",
+      "https://www.srmist.edu.in/placements",
+      "https://www.srmist.edu.in/research",
+      "https://www.srmist.edu.in/campus-life"
+    ]
+  },
+  
+  "content_extraction": {
+    "min_content_length": 100,
+    "skip_tags": ["script", "style", "nav", "footer", "header", "aside", "noscript"],
+    "skip_classes": ["menu", "navigation", "sidebar", "footer", "header", "nav"]
+  },
+  
+  "url_filters": {
+    "skip_extensions": [
+      ".pdf", ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg",
+      ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
+      ".zip", ".rar", ".tar", ".gz",
+      ".mp3", ".mp4", ".avi", ".mov"
+    ],
+    "skip_patterns": [
+      "login",
+      "logout",
+      "register",
+      "signin",
+      "signup",
+      "download"
+    ]
+  },
+  
+  "rate_limiting": {
+    "enabled": true,
+    "requests_per_minute": 30,
+    "politeness_delay": 1.0
+  }
+}
