@@ -1,0 +1,252 @@
+"""
+Build FAISS Vector Store - WORKING VERSION
+"""
+import os
+import sys
+import json
+import numpy as np
+from pathlib import Path
+
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
+from backend.core.embeddings import EmbeddingsGenerator
+from backend.core.vector_store import FAISSVectorStore
+
+# ADD: Supabase client initialization at top of file (after imports)
+from supabase import create_client, Client
+from dotenv import load_dotenv
+
+load_dotenv()
+
+def save_chunks_to_supabase(texts: list) -> bool:
+    """Save chunks to Supabase database"""
+    try:
+        SUPABASE_URL = os.getenv("SUPABASE_URL")
+        SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+        
+        if not SUPABASE_URL or not SUPABASE_KEY:
+            print("⚠️ Supabase credentials missing - saving locally only")
+            return False
+        
+        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+        
+        # Prepare data for batch insert
+        documents = [
+            {
+                "content": text,
+                "source_url": f"chunk_{i}"
+            }
+            for i, text in enumerate(texts)
+        ]
+        
+        # Clear existing data (optional - remove if you want to append)
+        supabase.table("documents").delete().neq("id", "00000000-0000-0000-0000-000000000000").execute()
+        
+        # Batch insert (Supabase supports up to 1000 rows per insert)
+        batch_size = 1000
+        for i in range(0, len(documents), batch_size):
+            batch = documents[i:i + batch_size]
+            response = supabase.table("documents").insert(batch).execute()
+            print(f"   Uploaded {min(i + batch_size, len(documents))}/{len(documents)} chunks to Supabase")
+        
+        print(f"✅ Saved {len(texts)} chunks to Supabase")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Supabase save failed: {str(e)}")
+        return False
+
+
+def load_chunks_from_supabase() -> list:
+    """Load chunks from Supabase database"""
+    try:
+        SUPABASE_URL = os.getenv("SUPABASE_URL")
+        SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+        
+        if not SUPABASE_URL or not SUPABASE_KEY:
+            print("⚠️ Supabase credentials missing - using local storage")
+            return None
+        
+        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+        
+        # Fetch all documents
+        response = supabase.table("documents").select("*").execute()
+        
+        if response.data:
+            print(f"✅ Loaded {len(response.data)} chunks from Supabase")
+            
+            # Convert to standard format
+            chunks = [
+                {
+                    'text': doc['content'],
+                    'metadata': {
+                        'chunk_id': doc['id'],
+                        'source': doc.get('source_url', 'unknown')
+                    }
+                }
+                for doc in response.data
+            ]
+            return chunks
+        else:
+            print("⚠️ No documents found in Supabase")
+            return None
+            
+    except Exception as e:
+        print(f"❌ Supabase load failed: {str(e)}")
+        return None
+
+
+def load_chunks(chunks_path: str) -> list:
+    """Load chunks from JSON"""
+    print(f"\n📂 Loading chunks from: {chunks_path}")
+    
+    with open(chunks_path, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    
+    if isinstance(data, dict) and 'chunks' in data:
+        chunks = data['chunks']
+    elif isinstance(data, list):
+        chunks = data
+    else:
+        chunks = list(data.values()) if isinstance(data, dict) else data
+    
+    print(f"✅ Loaded {len(chunks)} chunks")
+    return chunks
+
+
+def normalize_chunks(chunks: list) -> list:
+    """Normalize chunk format"""
+    print(f"\n🔄 Normalizing chunks...")
+    normalized = []
+    
+    for i, chunk in enumerate(chunks):
+        if isinstance(chunk, dict):
+            text = chunk.get('text') or chunk.get('chunk_text') or chunk.get('content', '')
+            if text:
+                normalized.append({
+                    'text': text,
+                    'metadata': chunk.get('metadata', {'chunk_id': i})
+                })
+        elif isinstance(chunk, str):
+            normalized.append({'text': chunk, 'metadata': {'chunk_id': i}})
+    
+    print(f"✅ Normalized {len(normalized)} chunks")
+    return normalized
+
+
+def main():
+    print("\n" + "="*70)
+    print("🚀 BUILDING FAISS VECTOR STORE")
+    print("="*70)
+    
+   # Paths
+project_root = Path(__file__).parent.parent
+
+# Priority: Try merged chunks first (DB + web data)
+chunks_path = project_root / "data" / "processed" / "merged_chunks.json"
+
+# Fallback 1: Improved chunks
+if not chunks_path.exists():
+    print("⚠️ Merged chunks not found, trying improved_chunks...")
+    chunks_path = project_root / "data" / "processed" / "improved_chunks.json"
+
+# Fallback 2: Original chunks
+if not chunks_path.exists():
+    print("⚠️ Improved chunks not found, trying original chunks...")
+    chunks_path = project_root / "data" / "processed" / "chunks.json"
+
+vectorstore_dir = str(project_root / "data" / "vectorstore")
+
+try:
+    # Step 1: Load chunks (try Supabase first, fallback to local)
+    print("\n📂 Attempting to load from Supabase...")
+    chunks = load_chunks_from_supabase()
+    
+    if not chunks:
+        if not chunks_path.exists():
+            print(f"❌ No chunks file found!")
+            print(f"   Run: python scripts/integrate_new_dataset.py")
+            sys.exit(1)
+        print("📂 Falling back to local storage...")
+        chunks = load_chunks(str(chunks_path))
+    
+    normalized_chunks = normalize_chunks(chunks)
+    
+    if not normalized_chunks:
+        print("❌ No chunks to process!")
+        sys.exit(1)
+    
+    print(f"\n📊 Processing {len(normalized_chunks)} chunks")
+    
+    # Initialize
+    print("\n🔧 Initializing embeddings generator...")
+    embeddings_generator = EmbeddingsGenerator()
+    
+    # Generate embeddings
+    print(f"\n🔢 Generating embeddings...")
+    texts = [c['text'] for c in normalized_chunks]
+    
+    all_embeddings = []
+    batch_size = 32
+    for i in range(0, len(texts), batch_size):
+        batch = texts[i:i + batch_size]
+        batch_embs = embeddings_generator.embed(batch)
+        all_embeddings.extend(batch_embs)
+        print(f"   Progress: {min(i + batch_size, len(texts))}/{len(texts)}")
+    
+    embeddings = np.array(all_embeddings, dtype=np.float32)
+    print(f"✅ Generated embeddings: {embeddings.shape}")
+    
+    # Build vector store
+    print(f"\n🏗️ Building FAISS index...")
+    vector_store = FAISSVectorStore()
+    
+    # Add embeddings
+    vector_store.add_embeddings(texts, embeddings)
+    print(f"✅ Added {len(embeddings)} vectors to index")
+    
+    # Save
+    print(f"\n💾 Saving to {vectorstore_dir}...")
+    os.makedirs(vectorstore_dir, exist_ok=True)
+    vector_store.save_index(vectorstore_dir)
+    
+    # Save chunks locally (backup)
+    chunks_file = os.path.join(vectorstore_dir, 'chunks.json')
+    with open(chunks_file, 'w', encoding='utf-8') as f:
+        json.dump(texts, f, indent=2, ensure_ascii=False)
+
+    # Save to Supabase
+    save_chunks_to_supabase(texts)
+    
+    print(f"✅ Saved successfully!")
+    
+    # Test
+    print(f"\n🧪 Testing search...")
+    test_query = "What programs does SRM offer?"
+    test_emb = embeddings_generator.embed([test_query])[0]
+    
+    results = vector_store.search(test_emb, k=3)
+    print(f"✅ Retrieved {len(results)} results")
+    
+    if results:
+        print(f"\n📄 Top result preview:")
+        print(f"   {results[0].get('chunk', '')[:150]}...")
+    
+    print("\n" + "="*70)
+    print("✅ BUILD COMPLETE!")
+    print("="*70)
+    print(f"📍 Location: {vectorstore_dir}")
+    print(f"📊 Vectors: {len(embeddings)}")
+    print(f"🎯 Source: {chunks_path.name}")
+    print()
+    
+except Exception as e:
+    print(f"\n❌ Error: {str(e)}")
+    import traceback
+    traceback.print_exc()
+    sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

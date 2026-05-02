@@ -164,3 +164,177 @@ def extract_topics_for_followups(query: str, answer: str = "") -> list:
 
 
 
+
+
+
+
+
+
+
+
+
+    """
+ChatGPT-style conversational prompts - Anti-hallucination + Smart suggestions
+"""
+
+
+def create_answer_prompt(query: str, context: str) -> str:
+        return f"""You are Kivy, a helpful campus assistant at SRM University.
+
+    Context:
+    {context}
+
+    Question:
+    {query}
+
+    RULES:
+    1. Answer clearly in 2-3 sentences
+    2. Be friendly and natural
+    3. Use ONLY the provided context
+    4. DO NOT include suggestions inside the answer
+
+    AFTER THE ANSWER:
+    Generate 3 short follow-up questions relevant to the query.
+
+    FORMAT STRICTLY:
+    Answer: <your answer>
+
+    Suggestions:
+    1. ...
+    2. ...
+    3. ...
+
+    Answer:"""
+
+def create_no_context_response(query: str) -> str:
+    """Clean fallback when no context found"""
+    return (
+        "I don't have accurate information about that in my database right now. "
+        "Try asking about admissions, programs, campus facilities, or placements!"
+    )
+
+
+def get_smart_suggestions(query: str, answer: str = "") -> list:
+    """
+    Generate follow-up suggestions based on the ANSWER content,
+    not just the query keywords. Falls back to query-based if needed.
+    """
+    text = (answer + " " + query).lower()
+
+    # --- Placement / Career related ---
+    if any(w in text for w in ['placement', 'recruit', 'package', 'lpa', 'salary', 'offer', 'hired', 'job']):
+        suggestions = []
+        if 'company' not in text and 'companies' not in text:
+            suggestions.append("Which companies recruit from SRM?")
+        if 'package' not in text and 'salary' not in text:
+            suggestions.append("What is the average placement package?")
+        if 'training' not in text:
+            suggestions.append("What training programs are offered for placements?")
+        if 'internship' not in text:
+            suggestions.append("Are internships available for students?")
+        return suggestions[:3]
+
+    # --- Admission related ---
+    if any(w in text for w in ['admission', 'apply', 'srmjeee', 'enroll', 'application', 'join']):
+        suggestions = []
+        if 'eligibility' not in text and 'criteria' not in text:
+            suggestions.append("What is the eligibility criteria for admission?")
+        if 'fee' not in text and 'cost' not in text:
+            suggestions.append("What are the tuition fees?")
+        if 'deadline' not in text and 'last date' not in text:
+            suggestions.append("What are the application deadlines?")
+        if 'scholarship' not in text:
+            suggestions.append("Are scholarships available for new students?")
+        return suggestions[:3]
+
+    # --- Fee / Scholarship related ---
+    if any(w in text for w in ['fee', 'tuition', 'cost', 'payment', 'scholarship', 'financial']):
+        suggestions = []
+        if 'installment' not in text:
+            suggestions.append("Can fees be paid in installments?")
+        if 'scholarship' not in text:
+            suggestions.append("What scholarships does SRM offer?")
+        if 'hostel' not in text:
+            suggestions.append("What are the hostel fees?")
+        return suggestions[:3]
+
+    # --- Hostel / Accommodation ---
+    if any(w in text for w in ['hostel', 'accommodation', 'room', 'mess', 'dorm', 'stay']):
+        suggestions = []
+        if 'fee' not in text and 'cost' not in text:
+            suggestions.append("What are the hostel fees?")
+        if 'mess' not in text and 'food' not in text:
+            suggestions.append("What is the mess menu like?")
+        if 'facility' not in text and 'facilities' not in text:
+            suggestions.append("What facilities are available in hostels?")
+        if 'apply' not in text:
+            suggestions.append("How do I apply for hostel accommodation?")
+        return suggestions[:3]
+
+    # --- Location / Campus ---
+    if any(w in text for w in ['where', 'location', 'block', 'building', 'campus', 'reach', 'directions', 'map']):
+        suggestions = []
+        if 'transport' not in text and 'bus' not in text:
+            suggestions.append("How can I get to this location from the main gate?")
+        if 'nearby' not in text:
+            suggestions.append("What other facilities are nearby?")
+        if 'timing' not in text and 'hours' not in text:
+            suggestions.append("What are the timings for this place?")
+        return suggestions[:3]
+
+    # --- Library ---
+    if any(w in text for w in ['library', 'books', 'study', 'reading']):
+        return [
+            "What are the library timings?",
+            "How do I access digital resources?",
+            "Are there separate reading rooms available?"
+        ]
+
+    # --- Programs / Courses ---
+    if any(w in text for w in ['program', 'course', 'btech', 'mtech', 'mba', 'bba', 'degree', 'branch', 'specialization']):
+        suggestions = []
+        if 'fee' not in text:
+            suggestions.append("What are the fees for this program?")
+        if 'placement' not in text:
+            suggestions.append("What are the placement stats for this program?")
+        if 'syllabus' not in text and 'curriculum' not in text:
+            suggestions.append("What does the curriculum cover?")
+        if 'eligibility' not in text:
+            suggestions.append("What is the eligibility for this program?")
+        return suggestions[:3]
+
+    # --- Sports / Extracurricular ---
+    if any(w in text for w in ['sport', 'gym', 'club', 'fest', 'event', 'cultural', 'nss', 'ncc']):
+        return [
+            "What sports facilities are available on campus?",
+            "How do I join a club or society?",
+            "When are the major college fests held?"
+        ]
+
+    # --- Medical / Health ---
+    if any(w in text for w in ['hospital', 'medical', 'health', 'clinic', 'doctor']):
+        return [
+            "What are the hospital timings?",
+            "Is medical care free for students?",
+            "What emergency services are available?"
+        ]
+
+    # --- Transport ---
+    if any(w in text for w in ['bus', 'transport', 'shuttle', 'travel', 'route']):
+        return [
+            "What are the bus timings from Chennai?",
+            "Are there shuttle services within campus?",
+            "How far is SRM from Chennai airport?"
+        ]
+
+    # --- Default (generic but still useful) ---
+    return [
+        "Tell me more about SRM programs",
+        "What are the campus facilities?",
+        "How does the admission process work?"
+    ]
+
+
+def extract_topics_for_followups(query: str, answer: str = "") -> list:
+    """Alias for get_smart_suggestions - used by RAG engine"""
+    return get_smart_suggestions(query, answer)

@@ -61,6 +61,8 @@ import sys
 import os
 from typing import List, Dict, Tuple, Optional
 import numpy as np
+from supabase import create_client, Client
+from dotenv import load_dotenv
 
 # Add parent directory to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
@@ -73,6 +75,23 @@ class RAGEngine:
     """
     Complete RAG system with retrieval and generation.
     """
+    
+    load_dotenv()
+
+# Initialize Supabase client (module-level)
+try:
+    SUPABASE_URL = os.getenv("SUPABASE_URL")
+    SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+    
+    if SUPABASE_URL and SUPABASE_KEY:
+        supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+        print("✅ Supabase connected")
+    else:
+        supabase = None
+        print("⚠️ Supabase credentials not found - using local storage")
+except Exception as e:
+    supabase = None
+    print(f"⚠️ Supabase connection failed: {str(e)}")
     
     def __init__(self, 
                  vectorstore_dir: str,

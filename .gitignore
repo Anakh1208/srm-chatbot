@@ -10,3 +10,17 @@ scripts/data/vectorstore/
 
 # Output / temp
 OUTPUT/
+# env files
+.env
+backend/.env
+scripts/.env
+
+# python cache
+__pycache__/
+*.pyc
+
+# mac
+.DS_Store
+
+# venv
+venv_srm/

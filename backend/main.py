@@ -11,9 +11,7 @@ from fastapi.exceptions import RequestValidationError
 import time
 import logging
 from contextlib import asynccontextmanager
-
 from backend.api.routes import router, initialize_rag_engine
-from backend.api.auth_otp_service import router as auth_router
 
 
 # Configure logging
@@ -28,30 +26,28 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifespan context manager for startup/shutdown events."""
-    # Startup
     logger.info("🚀 Starting SRM Chatbot API with Ollama...")
-    
+
     try:
-        # Initialize RAG engine (Groq param removed)
         initialize_rag_engine(
             vectorstore_dir="data/vectorstore"
         )
         logger.info("✅ RAG engine initialized successfully")
-        
+
     except Exception as e:
         logger.error(f"❌ Failed to initialize RAG engine: {str(e)}")
         logger.error("⚠️  API will start but /chat endpoint will not work")
-    
+
     logger.info("✅ API is ready!")
-    
+
     yield
-    
+
     # Shutdown
     logger.info("🛑 Shutting down SRM Chatbot API...")
     logger.info("✅ Cleanup complete")
 
 
-# Create FastAPI app
+# ✅ Create FastAPI app FIRST before anything uses it
 app = FastAPI(
     title="SRM Chatbot API",
     description="RAG-powered chatbot for SRM University (Ollama-based)",
@@ -86,13 +82,13 @@ async def log_requests(request: Request, call_next):
     start_time = time.time()
     response = await call_next(request)
     process_time = time.time() - start_time
-    
+
     logger.info(
         f"{request.method} {request.url.path} - "
         f"Status: {response.status_code} - "
         f"Time: {process_time:.2f}s"
     )
-    
+
     response.headers["X-Process-Time"] = str(process_time)
     return response
 
@@ -102,14 +98,14 @@ async def log_requests(request: Request, call_next):
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     errors = exc.errors()
     error_messages = []
-    
+
     for error in errors:
         field = " -> ".join(str(x) for x in error["loc"])
         message = error["msg"]
         error_messages.append(f"{field}: {message}")
-    
+
     logger.warning(f"❌ Validation error: {error_messages}")
-    
+
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content={
@@ -123,7 +119,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, exc: Exception):
     logger.error(f"❌ Unexpected error: {str(exc)}", exc_info=True)
-    
+
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={
@@ -134,9 +130,9 @@ async def general_exception_handler(request: Request, exc: Exception):
     )
 
 
-# Include routers
+# ✅ Include routers AFTER app is defined
 app.include_router(router, prefix="", tags=["chatbot"])
-app.include_router(auth_router, prefix="", tags=["authentication"])
+
 
 logger.info("✅ All routes registered (chat + auth)")
 
@@ -170,7 +166,7 @@ async def root():
 # Run the application
 if __name__ == "__main__":
     import uvicorn
-    
+
     uvicorn.run(
         "backend.main:app",
         host="0.0.0.0",

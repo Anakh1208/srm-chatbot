@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kivy - SRM Chatbot</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -29,6 +25,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            position: relative;
         }
 
         .chat-header {
@@ -39,28 +36,8 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
-        .chat-header .bot-avatar {
-            width: 60px;
-            height: 60px;
-            background: white;
-            border-radius: 50%;
-            margin: 0 auto 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        }
-
-        .chat-header h1 {
-            font-size: 28px;
-            margin-bottom: 5px;
-        }
-
-        .chat-header p {
-            font-size: 13px;
-            opacity: 0.9;
-        }
+        .chat-header h1 { font-size: 28px; margin-bottom: 5px; }
+        .chat-header p { font-size: 13px; opacity: 0.9; }
 
         .chat-messages {
             flex: 1;
@@ -80,9 +57,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .message.user {
-            justify-content: flex-end;
-        }
+        .message.user { justify-content: flex-end; }
 
         .message-bubble {
             max-width: 75%;
@@ -104,68 +79,7 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        .bot-name {
-            font-weight: bold;
-            color: #667eea;
-            font-size: 12px;
-            margin-bottom: 5px;
-        }
-
-        .sources {
-            margin-top: 10px;
-            padding: 10px;
-            background: #f0f4ff;
-            border-radius: 8px;
-            font-size: 11px;
-        }
-
-        .source-link {
-            display: block;
-            color: #667eea;
-            text-decoration: none;
-            margin-top: 5px;
-            padding: 5px;
-            background: white;
-            border-radius: 4px;
-        }
-
-        .source-link:hover {
-            background: #e8edff;
-        }
-
-        .follow-up {
-            margin-top: 10px;
-            padding: 10px;
-            background: #e8f5e9;
-            border-radius: 8px;
-            font-size: 12px;
-            color: #2e7d32;
-            font-style: italic;
-        }
-
-        .quick-options {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .quick-btn {
-            padding: 8px 12px;
-            background: white;
-            border: 2px solid #667eea;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 12px;
-            color: #667eea;
-            transition: all 0.3s;
-            text-align: center;
-        }
-
-        .quick-btn:hover {
-            background: #667eea;
-            color: white;
-        }
+        .bot-name { font-weight: bold; color: #667eea; font-size: 12px; margin-bottom: 5px; }
 
         .typing-indicator {
             display: none;
@@ -173,30 +87,15 @@
             background: white;
             border-radius: 18px;
             width: 60px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        .typing-indicator.active {
-            display: block;
-        }
-
+        .typing-indicator.active { display: block; }
         .typing-indicator span {
-            height: 8px;
-            width: 8px;
-            background: #667eea;
-            border-radius: 50%;
-            display: inline-block;
-            margin: 0 2px;
-            animation: typing 1.4s infinite;
+            height: 8px; width: 8px; background: #667eea; border-radius: 50%;
+            display: inline-block; margin: 0 2px; animation: typing 1.4s infinite;
         }
-
-        .typing-indicator span:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .typing-indicator span:nth-child(3) {
-            animation-delay: 0.4s;
-        }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
 
         @keyframes typing {
             0%, 60%, 100% { transform: translateY(0); }
@@ -217,12 +116,9 @@
             border-radius: 25px;
             outline: none;
             font-size: 14px;
-            transition: border-color 0.3s;
         }
 
-        #userInput:focus {
-            border-color: #667eea;
-        }
+        #userInput:focus { border-color: #667eea; }
 
         #sendBtn {
             margin-left: 10px;
@@ -232,104 +128,12 @@
             border: none;
             border-radius: 25px;
             cursor: pointer;
-            font-size: 14px;
             font-weight: 600;
-            transition: transform 0.2s;
+            font-size: 14px;
         }
 
-        #sendBtn:hover {
-            transform: scale(1.05);
-        }
-
-        #sendBtn:active {
-            transform: scale(0.95);
-        }
-
-        #sendBtn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .welcome-message {
-            text-align: center;
-            padding: 20px;
-            color: #666;
-        }
-
-        .welcome-message h3 {
-            color: #667eea;
-            margin-bottom: 15px;
-            font-size: 18px;
-        }
-
-        .welcome-intro {
-            background: linear-gradient(135deg, #e3f2fd 0%, #e8eaf6 100%);
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            color: #1565c0;
-        }
-
-        .example-questions {
-            margin-top: 15px;
-        }
-
-        .example-btn {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 13px;
-            color: #667eea;
-            transition: all 0.3s;
-            text-align: left;
-        }
-
-        .example-btn:hover {
-            background: #f0f4ff;
-            border-color: #667eea;
-            transform: translateX(5px);
-        }
-
-        .confidence-badge {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 10px;
-            margin-top: 5px;
-        }
-
-        .confidence-high {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .confidence-medium {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .confidence-low {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .chat-messages::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .chat-messages::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-
-        .chat-messages::-webkit-scrollbar-thumb {
-            background: #667eea;
-            border-radius: 3px;
-        }
+        #sendBtn:hover { opacity: 0.9; }
+        #sendBtn:disabled { opacity: 0.5; cursor: not-allowed; }
 
         .menu-bar {
             background: #f5f7fb;
@@ -338,19 +142,7 @@
             border-bottom: 1px solid #e0e0e0;
         }
 
-        .menu-title {
-            font-size: 11px;
-            color: #666;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-
-        .menu-options {
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            padding-bottom: 5px;
-        }
+        .menu-options { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; }
 
         .menu-option {
             padding: 6px 12px;
@@ -361,79 +153,62 @@
             font-size: 11px;
             color: #667eea;
             white-space: nowrap;
-            transition: all 0.3s;
+            transition: 0.2s;
         }
 
-        .menu-option:hover {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
+        .menu-option:hover { background: #eef1ff; }
+
+        .suggestions {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
         }
+
+        .suggestion-btn {
+            padding: 6px 12px;
+            border-radius: 15px;
+            border: 1px solid #d6dbff;
+            background: #eef1ff;
+            color: #444;
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.2s;
+            text-align: left;
+        }
+
+        .suggestion-btn:hover { background: #d6dbff; }
+
+        .chat-messages::-webkit-scrollbar { width: 6px; }
+        .chat-messages::-webkit-scrollbar-thumb { background: #667eea; border-radius: 3px; }
     </style>
 </head>
 <body>
     <div class="chat-container">
         <div class="chat-header">
-            <div class="bot-avatar">🤖</div>
             <h1>Kivy</h1>
             <p>Your SRM University Assistant</p>
         </div>
 
         <div class="menu-bar">
-            <div class="menu-title">QUICK ACTIONS</div>
             <div class="menu-options">
                 <div class="menu-option" onclick="askQuestion('What programs does SRM offer?')">📚 Programs</div>
                 <div class="menu-option" onclick="askQuestion('Tell me about admissions')">📝 Admissions</div>
                 <div class="menu-option" onclick="askQuestion('What are the campus facilities?')">🏫 Campus</div>
                 <div class="menu-option" onclick="askQuestion('Information about placements')">💼 Placements</div>
-                <div class="menu-option" onclick="askQuestion('Faculty information')">👨‍🏫 Faculty</div>
             </div>
         </div>
 
         <div class="chat-messages" id="chatMessages">
-            <div class="welcome-message">
-                <div class="welcome-intro">
-                    <h3>👋 Hey! I'm Kivy</h3>
-                    <p>Your friendly SRM University assistant! How can I help you today?</p>
-                </div>
-                
-                <p style="font-size: 13px; margin-bottom: 15px;">I can help you with:</p>
-                
-                <div class="example-questions">
-                    <button class="example-btn" onclick="askQuestion('What programs does SRM offer?')">
-                        📚 Programs & Courses
-                    </button>
-                    <button class="example-btn" onclick="askQuestion('Tell me about admissions')">
-                        📝 Admission Process
-                    </button>
-                    <button class="example-btn" onclick="askQuestion('What are the campus facilities?')">
-                        🏫 Campus Facilities
-                    </button>
-                    <button class="example-btn" onclick="askQuestion('Information about placements')">
-                        💼 Placements & Careers
-                    </button>
-                    <button class="example-btn" onclick="askQuestion('Tell me about faculty')">
-                        👨‍🏫 Faculty Information
-                    </button>
-                </div>
-            </div>
-
             <div class="message bot">
                 <div class="typing-indicator" id="typingIndicator">
-                    <span></span>
-                    <span></span>
-                    <span></span>
+                    <span></span><span></span><span></span>
                 </div>
             </div>
         </div>
 
         <div class="chat-input">
-            <input 
-                type="text" 
-                id="userInput" 
-                placeholder="Ask Kivy anything..." 
-                onkeypress="handleKeyPress(event)"
-            />
+            <input type="text" id="userInput" placeholder="Ask Kivy anything..." onkeypress="handleKeyPress(event)" />
             <button id="sendBtn" onclick="sendMessage()">Send</button>
         </div>
     </div>
@@ -445,194 +220,111 @@
         const sendBtn = document.getElementById('sendBtn');
         const typingIndicator = document.getElementById('typingIndicator');
 
-        function handleKeyPress(event) {
-            if (event.key === 'Enter') {
-                sendMessage();
-            }
-        }
+        window.onload = function() {
+            addKivyMessage("Hi! I'm Kivy, your SRM University assistant 🎓 How can I help you today?", [
+                "Tell me about B.Tech programs",
+                "How does admission work?",
+                "What are placement stats?"
+            ]);
+        };
 
-        function askQuestion(question) {
-            userInput.value = question;
+        function handleKeyPress(e) { if (e.key === 'Enter') sendMessage(); }
+
+        function askQuestion(q) {
+            userInput.value = q;
             sendMessage();
         }
 
         async function sendMessage() {
             const message = userInput.value.trim();
-            
             if (!message) return;
 
-            // Disable input
-            userInput.disabled = true;
-            sendBtn.disabled = true;
-
-            // Add user message
             addMessage(message, 'user');
             userInput.value = '';
 
-            // Show typing indicator
+            userInput.disabled = true;
+            sendBtn.disabled = true;
             typingIndicator.classList.add('active');
-            scrollToBottom();
 
             try {
-                // Call API
                 const response = await fetch(API_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ query: message })
                 });
-
                 const data = await response.json();
                 typingIndicator.classList.remove('active');
-
-                // Add bot response with Kivy's personality
                 addBotMessage(data);
-                
-                // Add follow-up prompt
-                addFollowUpPrompt();
-
             } catch (error) {
                 typingIndicator.classList.remove('active');
-                addKivyMessage('Oops! I encountered an error. Please make sure the API server is running on port 8001. 😅');
-                console.error('Error:', error);
+                addKivyMessage('Oops! Make sure the backend server is running. 😅');
             }
 
-            // Re-enable input
             userInput.disabled = false;
             sendBtn.disabled = false;
             userInput.focus();
         }
 
         function addMessage(text, sender) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${sender}`;
-            
-            const bubbleDiv = document.createElement('div');
-            bubbleDiv.className = 'message-bubble';
-            bubbleDiv.textContent = text;
-            
-            messageDiv.appendChild(bubbleDiv);
-            chatMessages.appendChild(messageDiv);
-            scrollToBottom();
-        }
-
-        function addKivyMessage(text) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message bot';
-            
-            const bubbleDiv = document.createElement('div');
-            bubbleDiv.className = 'message-bubble';
-            
-            const nameDiv = document.createElement('div');
-            nameDiv.className = 'bot-name';
-            nameDiv.textContent = 'Kivy';
-            bubbleDiv.appendChild(nameDiv);
-            
-            const textDiv = document.createElement('p');
-            textDiv.textContent = text;
-            bubbleDiv.appendChild(textDiv);
-            
-            messageDiv.appendChild(bubbleDiv);
-            chatMessages.appendChild(messageDiv);
-            scrollToBottom();
-        }
-
-        function addBotMessage(data) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message bot';
-            
-            const bubbleDiv = document.createElement('div');
-            bubbleDiv.className = 'message-bubble';
-            
-            // Add Kivy name
-            const nameDiv = document.createElement('div');
-            nameDiv.className = 'bot-name';
-            nameDiv.textContent = 'Kivy';
-            bubbleDiv.appendChild(nameDiv);
-            
-            // Add answer
-            const answerP = document.createElement('p');
-            answerP.textContent = data.answer;
-            bubbleDiv.appendChild(answerP);
-
-            // Add confidence badge
-            if (data.confidence) {
-                const badge = document.createElement('span');
-                badge.className = `confidence-badge confidence-${data.confidence}`;
-                badge.textContent = `${data.confidence.charAt(0).toUpperCase() + data.confidence.slice(1)} Confidence`;
-                bubbleDiv.appendChild(badge);
-            }
-
-            // Add sources
-            if (data.sources && data.sources.length > 0) {
-                const sourcesDiv = document.createElement('div');
-                sourcesDiv.className = 'sources';
-                
-                const sourcesTitle = document.createElement('strong');
-                sourcesTitle.textContent = '📚 Sources:';
-                sourcesDiv.appendChild(sourcesTitle);
-
-                data.sources.forEach((source, index) => {
-                    const sourceLink = document.createElement('a');
-                    sourceLink.className = 'source-link';
-                    sourceLink.href = source.url;
-                    sourceLink.target = '_blank';
-                    sourceLink.textContent = `${index + 1}. ${source.title}`;
-                    sourcesDiv.appendChild(sourceLink);
-                });
-
-                bubbleDiv.appendChild(sourcesDiv);
-            }
-            
-            messageDiv.appendChild(bubbleDiv);
-            chatMessages.appendChild(messageDiv);
-            scrollToBottom();
-        }
-
-        function addFollowUpPrompt() {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message bot';
-            
-            const bubbleDiv = document.createElement('div');
-            bubbleDiv.className = 'message-bubble';
-            
-            const followUp = document.createElement('div');
-            followUp.className = 'follow-up';
-            followUp.innerHTML = '💬 Is there anything else I can help you with?';
-            bubbleDiv.appendChild(followUp);
-
-            const quickOptions = document.createElement('div');
-            quickOptions.className = 'quick-options';
-            
-            const options = [
-                { text: '📚 More Programs', query: 'Tell me more about programs' },
-                { text: '📝 Admissions', query: 'Admission process' },
-                { text: '🏫 Campus Life', query: 'Campus facilities' },
-                { text: '💼 Placements', query: 'Placement details' }
-            ];
-
-            options.forEach(option => {
-                const btn = document.createElement('button');
-                btn.className = 'quick-btn';
-                btn.textContent = option.text;
-                btn.onclick = () => askQuestion(option.query);
-                quickOptions.appendChild(btn);
-            });
-
-            bubbleDiv.appendChild(quickOptions);
-            messageDiv.appendChild(bubbleDiv);
-            chatMessages.appendChild(messageDiv);
-            scrollToBottom();
-        }
-
-        function scrollToBottom() {
+            const div = document.createElement('div');
+            div.className = `message ${sender}`;
+            div.innerHTML = `<div class="message-bubble">${text}</div>`;
+            chatMessages.appendChild(div);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        window.addEventListener('load', () => {
-            userInput.focus();
-        });
+        function addKivyMessage(text, suggestions = []) {
+            const div = document.createElement('div');
+            div.className = 'message bot';
+
+            let suggestionsHtml = '';
+            if (suggestions && suggestions.length > 0) {
+                suggestionsHtml = '<div class="suggestions">' +
+                    suggestions.map(s =>
+                        `<button class="suggestion-btn" onclick="askQuestion('${s}')">${s}</button>`
+                    ).join('') +
+                    '</div>';
+            }
+
+            div.innerHTML = `
+                <div class="message-bubble">
+                    <div class="bot-name">Kivy</div>
+                    <p>${text}</p>
+                    ${suggestionsHtml}
+                </div>`;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function addBotMessage(data) {
+            const div = document.createElement('div');
+            div.className = 'message bot';
+
+            let suggestionsHtml = '';
+            const followUps = data.follow_ups || data.suggestions || [];
+            if (followUps.length > 0) {
+                suggestionsHtml = '<div class="suggestions">' +
+                    followUps.map(s =>
+                        `<button class="suggestion-btn" onclick="askQuestion('${s}')">${s}</button>`
+                    ).join('') +
+                    '</div>';
+            }
+
+            let sourcesHtml = '';
+            if (data.sources && data.sources.length > 0) {
+                sourcesHtml = '<div style="font-size:10px; color:#999; margin-top:8px;">📚 Sources provided in console.</div>';
+            }
+
+            div.innerHTML = `
+                <div class="message-bubble">
+                    <div class="bot-name">Kivy</div>
+                    <p>${data.answer}</p>
+                    ${suggestionsHtml}
+                    ${sourcesHtml}
+                </div>`;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
     </script>
 </body>
 </html>

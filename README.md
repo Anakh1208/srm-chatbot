@@ -1,268 +1,269 @@
-# 🎓 SRM University AI Chatbot - Web Scraper
+# 🎓 SRM Chatbot - RAG-based Campus Assistant
 
-## Overview
-
-This is the web scraping module for the SRM University AI-powered chatbot. It crawls the university website, extracts clean text content, and stores it in JSON format for later processing.
-
-## 🚀 Quick Start
-
-### 1. Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 2. Run the Scraper
-
-```bash
-# From the project root directory
-python scripts/scrape_website.py
-```
-
-### 3. Check the Output
-
-The scraped data will be saved to `data/raw/scraped_data.json`
-
-## 📁 Project Structure
-
-```
-scrapers/
-├── __init__.py           # Module initialization
-├── scraper.py           # Core scraping logic (BeautifulSoup)
-├── crawler.py           # Crawling orchestration
-└── config.json          # Scraping configuration
-
-scripts/
-└── scrape_website.py    # Main script to run the crawler
-
-data/
-├── raw/                 # Scraped data (JSON files)
-├── processed/           # Cleaned and chunked data
-├── vectorstore/         # FAISS index files
-└── metadata/            # Crawling metadata and logs
-```
-
-## 🔧 Configuration
-
-Edit `scrapers/config.json` to customize the crawler:
-
-```json
-{
-  "scraping_config": {
-    "start_url": "https://www.srmist.edu.in",
-    "max_pages": 100,           // Maximum pages to crawl
-    "max_depth": 3,             // How deep to crawl (0 = start page only)
-    "delay_between_requests": 1.0,  // Seconds to wait between requests
-    "timeout": 10,              // Request timeout in seconds
-    "output_file": "../data/raw/scraped_data.json"
-  }
-}
-```
-
-## 📚 Module Documentation
-
-### UniversityScraper Class
-
-The `UniversityScraper` class handles individual page scraping.
-
-**Key Methods:**
-
-- `fetch_page(url)` - Downloads a webpage with error handling
-- `extract_text_content(soup)` - Extracts clean text from HTML
-- `extract_page_title(soup)` - Gets the page title
-- `scrape_page(url)` - Main method that scrapes a single page
-- `is_valid_url(url)` - Validates URLs before crawling
-- `extract_links(soup, current_url)` - Finds all internal links
-
-**Example Usage:**
-
-```python
-from scrapers.scraper import UniversityScraper
-
-# Create scraper instance
-scraper = UniversityScraper("https://www.srmist.edu.in")
-
-# Scrape a single page
-result = scraper.scrape_page("https://www.srmist.edu.in/admissions")
-
-if result:
-    print(f"Title: {result['page_title']}")
-    print(f"Content: {result['content'][:200]}...")
-```
-
-### UniversityCrawler Class
-
-The `UniversityCrawler` class orchestrates the crawling of multiple pages.
-
-**Key Methods:**
-
-- `crawl()` - Starts the crawling process
-- `save_to_json(output_file)` - Saves scraped data to JSON
-- `get_statistics()` - Returns crawling statistics
-
-**Example Usage:**
-
-```python
-from scrapers.crawler import UniversityCrawler
-
-# Create crawler instance
-crawler = UniversityCrawler(
-    start_url="https://www.srmist.edu.in",
-    max_pages=50,
-    max_depth=2,
-    delay=1.0
-)
-
-# Start crawling
-data = crawler.crawl()
-
-# Save results
-crawler.save_to_json("data/raw/scraped_data.json")
-
-# Get statistics
-stats = crawler.get_statistics()
-print(stats)
-```
-
-## 🎯 Features
-
-### ✅ What It Does
-
-- **Crawls Internal Links Only** - Stays within the university domain
-- **Avoids Non-Text Files** - Skips PDFs, images, videos, etc.
-- **Extracts Clean Text** - Removes navigation, footers, scripts, styles
-- **Polite Crawling** - Configurable delays between requests
-- **Progress Tracking** - Real-time console output
-- **Error Handling** - Gracefully handles timeouts and errors
-- **Metadata Tracking** - Saves crawl statistics and timestamps
-
-### ⚠️ What It Avoids
-
-- External links (different domains)
-- PDF, image, and media files
-- Login/logout pages
-- Download links
-- Duplicate pages
-- Pages with insufficient content
-
-## 📊 Output Format
-
-The scraper produces a JSON file with this structure:
-
-```json
-[
-  {
-    "url": "https://www.srmist.edu.in/admissions",
-    "page_title": "Admissions - SRM Institute of Science and Technology",
-    "content": "Clean text content extracted from the page..."
-  },
-  {
-    "url": "https://www.srmist.edu.in/academics",
-    "page_title": "Academics - SRM Institute of Science and Technology",
-    "content": "Clean text content extracted from the page..."
-  }
-]
-```
-
-## 🛠️ Advanced Usage
-
-### Crawl Specific Sections
-
-```python
-from scrapers.crawler import UniversityCrawler
-
-# Create crawler for specific section
-crawler = UniversityCrawler(
-    start_url="https://www.srmist.edu.in/admissions",
-    max_pages=20,
-    max_depth=1  # Only crawl direct children
-)
-
-data = crawler.crawl()
-```
-
-### Test Single Page Scraping
-
-```python
-from scrapers.scraper import UniversityScraper
-
-scraper = UniversityScraper("https://www.srmist.edu.in")
-
-# Test on a single page
-page_data = scraper.scrape_page("https://www.srmist.edu.in/about")
-
-if page_data:
-    print("✅ Success!")
-    print(f"Title: {page_data['page_title']}")
-    print(f"Content length: {len(page_data['content'])} chars")
-```
-
-## 🐛 Troubleshooting
-
-### Issue: "Connection timeout"
-
-**Solution:** Increase the timeout in config.json:
-
-```json
-"timeout": 20
-```
-
-### Issue: "Too many requests" or getting blocked
-
-**Solution:** Increase the delay between requests:
-
-```json
-"delay_between_requests": 2.0
-```
-
-### Issue: "No content extracted"
-
-**Possible causes:**
-- Page might be dynamically loaded (JavaScript)
-- Content might be behind a login
-- Page structure might be unusual
-
-**Solution:** Check the page manually and adjust the content extraction logic if needed.
-
-### Issue: "Module not found" error
-
-**Solution:** Make sure you're running from the project root:
-
-```bash
-cd /path/to/srm-chatbot
-python scripts/scrape_website.py
-```
-
-## 📝 Next Steps
-
-After scraping the data:
-
-1. **Process the text** - Clean and chunk the content (use `preprocessing/` module)
-2. **Generate embeddings** - Create vector representations (use `preprocessing/embeddings_generator.py`)
-3. **Build vector store** - Create FAISS index (use `scripts/build_vectorstore.py`)
-4. **Test RAG pipeline** - Query the knowledge base (use `scripts/test_query.py`)
-
-## ⚡ Performance Tips
-
-- Start with a small `max_pages` (e.g., 10-20) for testing
-- Use `max_depth=1` or `2` to avoid crawling too deep
-- Set appropriate delays to be respectful to the server
-- Run during off-peak hours for large crawls
-- Monitor the output to ensure quality
-
-## 🤝 Contributing
-
-When adding new features:
-
-1. Keep the code modular and well-commented
-2. Add error handling for edge cases
-3. Update the config.json if adding new parameters
-4. Test with small datasets first
-
-## 📄 License
-
-This project is for educational purposes as part of a Minor Project at SRM University.
+Production-ready chatbot with authentication, chat logging, and session management.
 
 ---
 
-**Happy Crawling! 🕷️**
+## 🚀 Features
+
+- ✅ **RAG-based QA** - FAISS + Ollama LLM
+- ✅ **SMS OTP Authentication** - Email + Phone verification
+- ✅ **Session Management** - Auto-logout on window close
+- ✅ **Chat Logging** - All conversations stored in Supabase
+- ✅ **User Tracking** - User data persisted in database
+- ✅ **Clean UI** - Single-page chat interface
+
+---
+
+## 📦 Tech Stack
+
+**Backend:**
+- FastAPI (Python 3.12)
+- FAISS (Vector search)
+- Sentence Transformers (Embeddings)
+- Ollama Gemma 3:1b (LLM)
+- Supabase (Database)
+
+**Frontend:**
+- HTML/CSS/JavaScript
+- sessionStorage (Auto-logout)
+
+---
+
+## 🗄️ Database Schema
+
+### Users Table
+```sql
+users (
+    id UUID PRIMARY KEY,
+    email TEXT,
+    phone TEXT UNIQUE,
+    created_at TIMESTAMP
+)
+```
+
+### Chat Logs Table
+```sql
+chat_logs (
+    id UUID PRIMARY KEY,
+    user_id UUID REFERENCES users(id),
+    query TEXT,
+    answer TEXT,
+    created_at TIMESTAMP
+)
+```
+
+---
+
+## ⚙️ Setup
+
+### 1. Clone & Install
+
+```bash
+git clone 
+cd srm-chatbot
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+### 2. Environment Variables
+
+Create `.env` file:
+
+```bash
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_KEY=your-anon-key
+```
+
+### 3. Setup Supabase
+
+Run SQL from STEP 1 in Supabase SQL Editor to create tables.
+
+### 4. Build Vector Store
+
+```bash
+python scripts/build_vectorstore.py
+```
+
+### 5. Run Backend
+
+```bash
+python -m uvicorn backend.main:app --reload --port 8001
+```
+
+### 6. Run Frontend
+
+```bash
+cd frontend
+python -m http.server 5501
+```
+
+Open: http://127.0.0.1:5501/kivy_chatbot.html
+
+---
+
+## 🔐 Authentication Flow
+
+1. User enters **email**
+2. User enters **phone number** (10 digits)
+3. OTP sent to phone (printed in console for demo)
+4. User enters **OTP**
+5. Verified → User stored in Supabase → Session created
+6. Chat logged to `chat_logs` table
+
+**Session Behavior:**
+- ✅ Refresh page → User stays logged in
+- ✅ Close window → User logged out (sessionStorage cleared)
+- ✅ Reopen → Login required
+
+---
+
+## 📊 Database Queries
+
+### View all users
+```sql
+SELECT * FROM users ORDER BY created_at DESC;
+```
+
+### View chat logs for a user
+```sql
+SELECT cl.*, u.email, u.phone 
+FROM chat_logs cl
+JOIN users u ON cl.user_id = u.id
+WHERE u.phone = '1234567890'
+ORDER BY cl.created_at DESC;
+```
+
+### Chat activity stats
+```sql
+SELECT 
+    u.email,
+    COUNT(cl.id) as total_chats,
+    MAX(cl.created_at) as last_chat
+FROM users u
+LEFT JOIN chat_logs cl ON u.id = cl.user_id
+GROUP BY u.email
+ORDER BY total_chats DESC;
+```
+
+---
+
+## 🧪 Testing
+
+**Test Authentication:**
+```bash
+curl -X POST http://127.0.0.1:8001/auth/send-otp \
+  -H "Content-Type: application/json" \
+  -d '{"email": "test@srm.edu", "phone": "9876543210"}'
+
+curl -X POST http://127.0.0.1:8001/auth/verify-otp \
+  -H "Content-Type: application/json" \
+  -d '{"phone": "9876543210", "otp": "123456"}'
+```
+
+**Test Chat (with user_id):**
+```bash
+curl -X POST http://127.0.0.1:8001/chat \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Where is library?", "user_id": "uuid-here"}'
+```
+
+---
+
+## 📁 Project Structure
+srm-chatbot/
+├── backend/
+│   ├── api/
+│   │   ├── auth.py          # OTP authentication + Supabase
+│   │   └── routes.py        # Chat endpoint + logging
+│   ├── core/
+│   │   ├── rag_engine.py    # RAG pipeline
+│   │   ├── prompts.py       # ChatGPT-style prompts
+│   │   ├── vector_store.py  # FAISS operations
+│   │   └── embeddings.py    # Sentence Transformers
+│   └── main.py              # FastAPI app
+├── frontend/
+│   └── kivy_chatbot.html    # Single-page chat UI
+├── data/
+│   ├── processed/
+│   │   └── merged_chunks.json
+│   └── vectorstore/
+│       └── faiss.index
+├── scripts/
+│   ├── build_vectorstore.py
+│   └── integrate_new_dataset.py
+├── .env
+├── requirements.txt
+└── README.md
+
+---
+
+## 🚨 Troubleshooting
+
+**Backend not starting:**
+```bash
+# Check if port 8001 is free
+lsof -ti:8001 | xargs kill -9
+```
+
+**Supabase connection failed:**
+```bash
+# Verify .env variables
+cat .env
+# Check Supabase project is active
+```
+
+**OTP not received:**
+```bash
+# Check terminal output for printed OTP (demo mode)
+# In production, integrate Twilio for real SMS
+```
+
+**Auto-logout not working:**
+```bash
+# Clear browser cache and sessionStorage
+sessionStorage.clear()
+```
+
+---
+
+## 📈 Production Deployment
+
+1. **Enable real SMS:**
+   - Integrate Twilio in `auth.py`
+   - Remove OTP printing
+
+2. **Security:**
+   - Add rate limiting
+   - Enable CORS properly
+   - Use HTTPS
+   - Secure Supabase RLS policies
+
+3. **Monitoring:**
+   - Add logging (winston/loguru)
+   - Setup error tracking (Sentry)
+   - Monitor DB queries
+
+---
+
+## 📄 License
+
+MIT License
+
+---
+
+## 👥 Contributors
+
+Your Team Name
+
+---
+
+## 🙏 Acknowledgments
+
+- SRM Institute of Science and Technology
+- Anthropic Claude for development assistance
+
+---
+
+**Built with ❤️ for SRM Students**

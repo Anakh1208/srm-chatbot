@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SRM Institute of Science and Technology</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #002147;
+            --blue: #0057B8;
+            --gold: #F5A623;
+            --orange: #E8642A;
+            --light: #F4F7FC;
+            --white: #ffffff;
+            --gray: #6B7280;
+            --border: #E2E8F0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            color: #1a1a2e;
+            overflow-x: hidden;
+        }
+
+        /* ── TOP UTILITY BAR ── */
+        .top-bar {
+            background: var(--navy);
+            color: #aab8cc;
+            font-size: 12.5px;
+            padding: 6px 0;
+        }
+        .top-bar-inner {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 0 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .top-bar a { color: #aab8cc; text-decoration: none; margin-right: 18px; transition: color .2s; }
+        .top-bar a:hover { color: var(--gold); }
+        .campus-dropdown { position: relative; display: inline-block; }
+        .campus-dropdown:hover .campus-menu { display: block; }
+        .campus-btn { background: none; border: none; color: #aab8cc; font-size: 12.5px; cursor: pointer; font-family: inherit; }
+        .campus-menu {
+            display: none;
+            position: absolute;
+            top: 100%; left: 0;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 0;
+            min-width: 220px;
+            box-shadow: 0 10px 30px rgba(0,0,0,.15);
+            z-index: 200;
+        }
+        .campus-menu a { display: block; padding: 8px 18px; color: #333; font-size: 13px; }
+        .campus-menu a:hover { background: var(--light); color: var(--blue); }
+
+        /* ── MAIN HEADER ── */
+        .header {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 16px rgba(0,0,0,.06);
+        }
+        .header-inner {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 0 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 72px;
+        }
+        .logo { display: flex; align-items: center; gap: 14px; text-decoration: none; }
+        .logo-badge {
+            width: 52px; height: 52px;
+            background: var(--navy);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-family: 'Playfair Display', serif;
+            font-size: 18px; font-weight: 900; letter-spacing: -1px;
+        }
+        .logo-text { line-height: 1.2; }
+        .logo-text strong { display: block; font-size: 14px; font-weight: 700; color: var(--navy); }
+        .logo-text span { font-size: 11px; color: var(--gray); font-weight: 400; }
+
+        .main-nav { display: flex; align-items: center; gap: 4px; }
+        .nav-item {
+            position: relative;
+        }
+        .nav-item > a, .nav-item > button {
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            text-decoration: none;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-family: inherit;
+            border-radius: 8px;
+            display: flex; align-items: center; gap: 4px;
+            transition: background .2s, color .2s;
+        }
+        .nav-item > a:hover, .nav-item > button:hover { background: var(--light); color: var(--blue); }
+        .nav-chevron { font-size: 10px; }
+        .dropdown-panel {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            min-width: 260px;
+            box-shadow: 0 20px 50px rgba(0,0,0,.12);
+            z-index: 200;
+        }
+        .nav-item:hover .dropdown-panel { display: block; }
+        .dropdown-panel h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--gray); margin-bottom: 10px; }
+        .dropdown-panel a { display: block; padding: 7px 0; font-size: 13.5px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0; transition: color .2s; }
+        .dropdown-panel a:hover { color: var(--blue); }
+        .dropdown-panel a:last-child { border-bottom: none; }
+
+        .header-cta {
+            background: var(--orange);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background .2s, transform .15s;
+        }
+        .header-cta:hover { background: #cf4f1a; transform: translateY(-1px); }
+
+        /* ── HERO ── */
+        .hero {
+            background: linear-gradient(135deg, #001535 0%, #002d6e 60%, #003b99 100%);
+            color: white;
+            padding: 0;
+            position: relative;
+            overflow: hidden;
+            min-height: 560px;
+            display: flex;
+            align-items: center;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .hero-blob {
+            position: absolute;
+            right: -100px; top: -100px;
+            width: 700px; height: 700px;
+            background: radial-gradient(circle, rgba(0, 87, 184, 0.35) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .hero-inner {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 80px 40px;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 60px;
+            width: 100%;
+        }
+        .hero-content { flex: 1; max-width: 640px; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(245, 166, 35, .15);
+            border: 1px solid rgba(245, 166, 35, .35);
+            color: var(--gold);
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 12.5px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 24px;
+        }
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(36px, 5vw, 60px);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 20px;
+        }
+        .hero h1 span { color: var(--gold); }
+        .hero p {
+            font-size: 17px;
+            line-height: 1.7;
+            color: rgba(255,255,255,.75);
+            margin-bottom: 36px;
+            font-weight: 300;
+        }
+        .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+        .btn-primary {
+            background: var(--orange);
+            color: white;
+            padding: 14px 32px;
+            border-radius: 50px;
+            font-size: 15px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all .2s;
+            box-shadow: 0 4px 20px rgba(232, 100, 42, .4);
+        }
+        .btn-primary:hover { background: #cf4f1a; transform: translateY(-2px); }
+        .btn-outline {
+            background: transparent;
+            color: white;
+            padding: 14px 32px;
+            border-radius: 50px;
+            font-size: 15px;
+            font-weight: 600;
+            text-decoration: none;
+            border: 1.5px solid rgba(255,255,255,.4);
+            transition: all .2s;
+        }
+        .btn-outline:hover { background: rgba(255,255,255,.1); }
+
+        .hero-stats {
+            display: flex; gap: 32px;
+            margin-top: 48px;
+            padding-top: 40px;
+            border-top: 1px solid rgba(255,255,255,.1);
+        }
+        .hero-stat-val {
+            font-family: 'Playfair Display', serif;
+            font-size: 36px;
+            font-weight: 900;
+            color: var(--gold);
+        }
+        .hero-stat-label { font-size: 12px; color: rgba(255,255,255,.6); margin-top: 2px; }
+
+        .hero-cards { display: flex; flex-direction: column; gap: 14px; }
+        .hero-card {
+            background: rgba(255,255,255,.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,.12);
+            border-radius: 16px;
+            padding: 20px 24px;
+            display: flex; align-items: center; gap: 16px;
+            min-width: 260px;
+            transition: all .2s;
+            cursor: pointer;
+        }
+        .hero-card:hover { background: rgba(255,255,255,.14); transform: translateX(-4px); }
+        .hero-card-icon { font-size: 28px; }
+        .hero-card-title { font-size: 14px; font-weight: 600; }
+        .hero-card-sub { font-size: 12px; color: rgba(255,255,255,.6); margin-top: 2px; }
+
+        /* ── RANKINGS BAR ── */
+        .rankings-bar {
+            background: linear-gradient(90deg, #6B5DD3 0%, #8B7FF4 100%);
+            color: white;
+            padding: 0;
+        }
+        .rankings-inner {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 0 40px;
+            display: flex;
+            align-items: stretch;
+            gap: 0;
+        }
+        .rank-feature {
+            padding: 40px 48px 40px 0;
+            margin-right: 48px;
+            border-right: 1px solid rgba(255,255,255,.2);
+            flex-shrink: 0;
+        }
+        .rank-feature-num {
+            font-family: 'Playfair Display', serif;
+            font-size: 90px;
+            font-weight: 900;
+            line-height: 1;
+        }
+        .rank-feature-num sup { font-size: 36px; vertical-align: super; }
+        .rank-feature-label { font-size: 13px; opacity: .75; margin-top: 4px; }
+        .rank-feature-source { font-size: 11px; opacity: .55; }
+
+        .rank-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1px;
+            background: rgba(255,255,255,.1);
+            padding: 1px;
+        }
+        .rank-cell {
+            background: linear-gradient(90deg, #6B5DD3 0%, #8B7FF4 100%);
+            padding: 22px 18px;
+            text-align: center;
+            transition: background .2s;
+        }
+        .rank-cell:hover { background: rgba(255,255,255,.15); }
+        .rank-cell-icon { font-size: 24px; margin-bottom: 6px; }
+        .rank-cell-num { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; }
+        .rank-cell-num sup { font-size: 14px; }
+        .rank-cell-label { font-size: 11px; opacity: .75; margin-top: 2px; }
+
+        /* ── ADMISSIONS BANNER ── */
+        .admissions-band {
+            background: var(--navy);
+            color: white;
+            padding: 28px 40px;
+        }
+        .admissions-band-inner {
+            max-width: 1440px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .admissions-band-text h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .admissions-band-text p { font-size: 14px; color: rgba(255,255,255,.65); margin-top: 4px; }
+        .admissions-band-links { display: flex; gap: 12px; }
+        .adm-link {
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-size: 13.5px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all .2s;
+        }
+        .adm-link-india { background: var(--orange); color: white; }
+        .adm-link-india:hover { background: #cf4f1a; }
+        .adm-link-intl { background: transparent; color: white; border: 1.5px solid rgba(255,255,255,.4); }
+        .adm-link-intl:hover { background: rgba(255,255,255,.1); }
+
+        /* ── PROGRAM FINDER ── */
+        .programs-section {
+            background: var(--light);
+            padding: 80px 40px;
+        }
+        .section-header { text-align: center; margin-bottom: 52px; }
+        .section-label {
+            display: inline-block;
+            font-size: 11.5px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--blue);
+            margin-bottom: 12px;
+        }
+        .section-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(28px, 4vw, 42px);
+            font-weight: 800;
+            color: var(--navy);
+        }
+        .section-header p { font-size: 16px; color: var(--gray); margin-top: 12px; max-width: 520px; margin-left: auto; margin-right: auto; }
+
+        .programs-grid {
+            max-width: 1440px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 20px;
+        }
+        .program-card {
+            background: white;
+            border-radius: 16px;
+            padding: 28px 24px;
+            border: 1px solid var(--border);
+            transition: all .25s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        .program-card:hover { border-color: var(--blue); box-shadow: 0 12px 40px rgba(0, 87, 184, .1); transform: translateY(-4px); }
+        .program-icon {
+            width: 52px; height: 52px;
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+        .program-card h3 { font-size: 15.5px; font-weight: 600; color: var(--navy); }
+        .program-card p { font-size: 13px; color: var(--gray); margin-top: 6px; line-height: 1.5; }
+        .program-arrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--blue);
+            margin-top: 14px;
+        }
+
+        /* ── STATS STRIP ── */
+        .stats-strip {
+            background: white;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 52px 40px;
+        }
+        .stats-strip-inner {
+            max-width: 1440px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0;
+            text-align: center;
+        }
+        .stat-item { padding: 0 24px; border-right: 1px solid var(--border); }
+        .stat-item:last-child { border-right: none; }
+        .stat-val {
+            font-family: 'Playfair Display', serif;
+            font-size: 42px;
+            font-weight: 900;
+            color: var(--navy);
+        }
+        .stat-val sup { font-size: 18px; }
+        .stat-label { font-size: 13px; color: var(--gray); margin-top: 6px; font-weight: 500; }
+
+        /* ── HIGHLIGHTS / NEWS ── */
+        .highlights {
+            padding: 80px 40px;
+            background: white;
+        }
+        .highlights-inner { max-width: 1440px; margin: 0 auto; }
+        .highlights-grid {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr 1fr;
+            gap: 24px;
+        }
+        .news-card-big {
+            background: var(--navy);
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            min-height: 420px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 32px;
+            cursor: pointer;
+            transition: transform .25s;
+        }
+        .news-card-big:hover { transform: scale(1.01); }
+        .news-card-bg {
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, #001a40, #003080);
+            opacity: .9;
+        }
+        .news-card-content { position: relative; z-index: 1; color: white; }
+        .news-tag {
+            display: inline-block;
+            background: var(--gold);
+            color: var(--navy);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 50px;
+            margin-bottom: 14px;
+        }
+        .news-card-big h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 22px;
+            font-weight: 800;
+            line-height: 1.3;
+            margin-bottom: 12px;
+        }
+        .news-meta { font-size: 12px; color: rgba(255,255,255,.55); }
+
+        .news-small-col { display: flex; flex-direction: column; gap: 16px; }
+        .news-card-sm {
+            background: var(--light);
+            border-radius: 16px;
+            padding: 22px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all .2s;
+            flex: 1;
+        }
+        .news-card-sm:hover { border-color: var(--blue); background: white; box-shadow: 0 8px 24px rgba(0,87,184,.08); }
+        .news-card-sm .news-tag { background: var(--blue); color: white; }
+        .news-card-sm h3 { font-size: 14.5px; font-weight: 600; color: var(--navy); line-height: 1.4; margin-top: 10px; }
+        .news-card-sm .news-meta { font-size: 12px; color: var(--gray); margin-top: 8px; }
+
+        /* ── QUICK LINKS ── */
+        .quicklinks {
+            background: var(--light);
+            padding: 60px 40px;
+        }
+        .quicklinks-inner {
+            max-width: 1440px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 16px;
+        }
+        .ql-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px 18px;
+            text-align: center;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all .2s;
+            text-decoration: none;
+            color: inherit;
+        }
+        .ql-card:hover { border-color: var(--orange); box-shadow: 0 8px 24px rgba(232,100,42,.12); transform: translateY(-3px); }
+        .ql-icon { font-size: 30px; margin-bottom: 10px; }
+        .ql-label { font-size: 13px; font-weight: 600; color: var(--navy); }
+
+        /* ── FOOTER ── */
+        footer {
+            background: #00112b;
+            color: rgba(255,255,255,.7);
+            padding: 60px 40px 30px;
+        }
+        .footer-inner { max-width: 1440px; margin: 0 auto; }
+        .footer-top {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr 1fr;
+            gap: 48px;
+            padding-bottom: 40px;
+            border-bottom: 1px solid rgba(255,255,255,.1);
+        }
+        .footer-brand .logo-badge { background: rgba(255,255,255,.1); }
+        .footer-brand .logo-text strong,
+        .footer-brand .logo-text span { color: white; }
+        .footer-brand p { font-size: 13.5px; line-height: 1.7; margin-top: 16px; }
+        .footer-col h4 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: white; margin-bottom: 16px; }
+        .footer-col a { display: block; font-size: 13px; color: rgba(255,255,255,.6); text-decoration: none; margin-bottom: 10px; transition: color .2s; }
+        .footer-col a:hover { color: var(--gold); }
+        .footer-bottom {
+            padding-top: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12.5px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .footer-bottom a { color: rgba(255,255,255,.5); text-decoration: none; margin-left: 16px; }
+        .footer-bottom a:hover { color: var(--gold); }
+
+        /* ── CHATBOT WIDGET (unchanged from original) ── */
+        .chatbot-widget {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 9999;
+        }
+        .chatbot-button {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8B7FF4 0%, #6B5DD3 100%);
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(139, 127, 244, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 8px 25px rgba(139, 127, 244, 0.5); }
+            50% { box-shadow: 0 8px 35px rgba(139, 127, 244, 0.8); }
+        }
+        .robot-emoji { font-size: 36px; }
+        .ask-kivy-text { color: white; font-size: 11px; font-weight: 700; }
+        .chatbot-modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .chatbot-modal.active { display: flex; }
+        .chatbot-modal-content {
+            width: 90%;
+            max-width: 900px;
+            height: 90%;
+            max-height: 850px;
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+            position: relative;
+        }
+        .close-modal {
+            position: absolute;
+            top: 15px; right: 15px;
+            width: 45px; height: 45px;
+            border-radius: 50%;
+            background: white;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            z-index: 10001;
+        }
+        #chatbot-iframe { width: 100%; height: 100%; border: none; }
+    </style>
+</head>
+<body>
+
+    <!-- TOP UTILITY BAR -->
+    <div class="top-bar">
+        <div class="top-bar-inner">
+            <div>
+                <a href="#">Students</a>
+                <a href="#">Faculty & Staff</a>
+                <a href="#">Parents</a>
+                <a href="#">Alumni</a>
+                <a href="#">Examinations</a>
+                <div class="campus-dropdown" style="display:inline-block">
+                    <button class="campus-btn">Campuses ▾</button>
+                    <div class="campus-menu">
+                        <a href="#">Kattankulathur – Chennai</a>
+                        <a href="#">Ramapuram – Chennai</a>
+                        <a href="#">Vadapalani – Chennai</a>
+                        <a href="#">Tiruchirappalli</a>
+                        <a href="#">Delhi – NCR</a>
+                        <a href="#">Baburayanpettai</a>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <a href="#">Library</a>
+                <a href="#">Career Centre</a>
+                <a href="#">News</a>
+                <a href="#">Events</a>
+                <a href="#">Contact Us</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN HEADER -->
+    <header class="header">
+        <div class="header-inner">
+            <a href="#" class="logo">
+                <div class="logo-badge">SRM</div>
+                <div class="logo-text">
+                    <strong>SRM Institute of Science</strong>
+                    <span>and Technology</span>
+                </div>
+            </a>
+
+            <nav class="main-nav">
+                <div class="nav-item">
+                    <button>Academics <span class="nav-chevron">▾</span></button>
+                    <div class="dropdown-panel">
+                        <h4>Colleges</h4>
+                        <a href="#">Engineering & Technology</a>
+                        <a href="#">Management</a>
+                        <a href="#">Science & Humanities</a>
+                        <a href="#">Law</a>
+                        <a href="#">Agricultural Sciences</a>
+                        <a href="#">Medicine & Health Sciences</a>
+                        <h4 style="margin-top:14px">Quick Links</h4>
+                        <a href="#">Programme Finder</a>
+                        <a href="#">Departments A–Z</a>
+                    </div>
+                </div>
+                <div class="nav-item">
+                    <button>Research <span class="nav-chevron">▾</span></button>
+                    <div class="dropdown-panel" style="left:-60px">
+                        <h4>Overview</h4>
+                        <a href="#">Directorate of Research</a>
+                        <a href="#">Funded Projects</a>
+                        <a href="#">Patents</a>
+                        <a href="#">Publications</a>
+                        <h4 style="margin-top:14px">Innovation</h4>
+                        <a href="#">Innovation & Incubation</a>
+                        <a href="#">FAB LAB</a>
+                    </div>
+                </div>
+                <div class="nav-item">
+                    <button>Campus Life <span class="nav-chevron">▾</span></button>
+                    <div class="dropdown-panel">
+                        <a href="#">Sports & Fitness</a>
+                        <a href="#">Clubs & Activities</a>
+                        <a href="#">Hostel & Accommodation</a>
+                        <a href="#">Cultural Events</a>
+                        <a href="#">Student Governance</a>
+                    </div>
+                </div>
+                <div class="nav-item">
+                    <button>International <span class="nav-chevron">▾</span></button>
+                    <div class="dropdown-panel">
+                        <a href="#">International Admissions</a>
+                        <a href="#">Exchange Programs</a>
+                        <a href="#">Visiting Faculty</a>
+                        <a href="#">Global MoUs</a>
+                    </div>
+                </div>
+                <div class="nav-item">
+                    <a href="#">About</a>
+                </div>
+            </nav>
+
+            <a href="#" class="header-cta">Apply 2026 →</a>
+        </div>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-blob"></div>
+        <div class="hero-inner">
+            <div class="hero-content">
+                <div class="hero-badge">🏆 &nbsp;NIRF Ranked #11 University in India — 2025</div>
+                <h1>Learn. Leap. <span>Lead.</span></h1>
+                <p>One of India's premier research universities, shaping global leaders across engineering, medicine, law, and beyond — with world-class faculty and 56,000+ students.</p>
+                <div class="hero-actions">
+                    <a href="#" class="btn-primary">Apply for 2026 Admissions</a>
+                    <a href="#" class="btn-outline">Explore Programmes</a>
+                </div>
+                <div class="hero-stats">
+                    <div>
+                        <div class="hero-stat-val">56K<sup>+</sup></div>
+                        <div class="hero-stat-label">Students</div>
+                    </div>
+                    <div>
+                        <div class="hero-stat-val">3K<sup>+</sup></div>
+                        <div class="hero-stat-label">Faculty</div>
+                    </div>
+                    <div>
+                        <div class="hero-stat-val">200<sup>+</sup></div>
+                        <div class="hero-stat-label">Programmes</div>
+                    </div>
+                    <div>
+                        <div class="hero-stat-val">#11</div>
+                        <div class="hero-stat-label">NIRF 2025</div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-cards">
+                <div class="hero-card">
+                    <div class="hero-card-icon">🎓</div>
+                    <div>
+                        <div class="hero-card-title">Programme Finder</div>
+                        <div class="hero-card-sub">200+ UG, PG & PhD programmes</div>
+                    </div>
+                </div>
+                <div class="hero-card">
+                    <div class="hero-card-icon">🏛️</div>
+                    <div>
+                        <div class="hero-card-title">Campus Virtual Tour</div>
+                        <div class="hero-card-sub">Explore Kattankulathur & more</div>
+                    </div>
+                </div>
+                <div class="hero-card">
+                    <div class="hero-card-icon">💼</div>
+                    <div>
+                        <div class="hero-card-title">Placements 2025</div>
+                        <div class="hero-card-sub">10,000+ offers · ₹45L highest CTC</div>
+                    </div>
+                </div>
+                <div class="hero-card">
+                    <div class="hero-card-icon">🔬</div>
+                    <div>
+                        <div class="hero-card-title">Research Hub</div>
+                        <div class="hero-card-sub">Explore patents, projects & labs</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- RANKINGS BAR -->
+    <section class="rankings-bar">
+        <div class="rankings-inner">
+            <div class="rank-feature">
+                <div class="rank-feature-num">11<sup>th</sup></div>
+                <div class="rank-feature-label">Overall University Ranking</div>
+                <div class="rank-feature-source">NIRF 2025</div>
+            </div>
+            <div class="rank-grid">
+                <div class="rank-cell">
+                    <div class="rank-cell-icon">⭐</div>
+                    <div class="rank-cell-num">4<sup>th</sup></div>
+                    <div class="rank-cell-label">SDG</div>
+                </div>
+                <div class="rank-cell">
+                    <div class="rank-cell-icon">🦷</div>
+                    <div class="rank-cell-num">8<sup>th</sup></div>
+                    <div class="rank-cell-label">Dental</div>
+                </div>
+                <div class="rank-cell">
+                    <div class="rank-cell-icon">💊</div>
+                    <div class="rank-cell-num">10<sup>th</sup></div>
+                    <div class="rank-cell-label">Pharmacy</div>
+                </div>
+                <div class="rank-cell">
+                    <div class="rank-cell-icon">⚙️</div>
+                    <div class="rank-cell-num">14<sup>th</sup></div>
+                    <div class="rank-cell-label">Engineering</div>
+                </div>
+                <div class="rank-cell">
+                    <div class="rank-cell-icon">❤️</div>
+                    <div class="rank-cell-num">18<sup>th</sup></div>
+                    <div class="rank-cell-label">Medical</div>
+                </div>
+                <div class="rank-cell">
+                    <div class="rank-cell-icon">🏛️</div>
+                    <div class="rank-cell-num">18<sup>th</sup></div>
+                    <div class="rank-cell-label">Architecture</div>
+                </div>
+                <div class="rank-cell">
+                    <div class="rank-cell-icon">🔬</div>
+                    <div class="rank-cell-num">25<sup>th</sup></div>
+                    <div class="rank-cell-label">Research</div>
+                </div>
+                <div class="rank-cell">
+                    <div class="rank-cell-icon">⚖️</div>
+                    <div class="rank-cell-num">25<sup>th</sup></div>
+                    <div class="rank-cell-label">Law</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ADMISSIONS BANNER -->
+    <section class="admissions-band">
+        <div class="admissions-band-inner">
+            <div class="admissions-band-text">
+                <h2>Admissions 2026–2027 Now Open</h2>
+                <p>Apply for B.Tech, M.Tech, MBBS, MBA, BBA, B.Sc, LLB and more programs across all campuses</p>
+            </div>
+            <div class="admissions-band-links">
+                <a href="#" class="adm-link adm-link-india">India Admissions</a>
+                <a href="#" class="adm-link adm-link-intl">International Admissions</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROGRAMMES -->
+    <section class="programs-section">
+        <div class="section-header">
+            <div class="section-label">What we offer</div>
+            <h2>Explore Our Programmes</h2>
+            <p>From engineering to medicine — choose your path to excellence</p>
+        </div>
+        <div class="programs-grid">
+            <a href="#" class="program-card">
+                <div class="program-icon" style="background:#EEF4FF">⚙️</div>
+                <h3>Engineering & Technology</h3>
+                <p>CS, AI, ECE, Mechanical, Civil, and 30+ specialisations</p>
+                <div class="program-arrow">Explore →</div>
+            </a>
+            <a href="#" class="program-card">
+                <div class="program-icon" style="background:#FFF3EE">❤️</div>
+                <h3>Medicine & Health Sciences</h3>
+                <p>MBBS, BDS, Pharmacy, Nursing, Physiotherapy</p>
+                <div class="program-arrow">Explore →</div>
+            </a>
+            <a href="#" class="program-card">
+                <div class="program-icon" style="background:#EEFAF3">💼</div>
+                <h3>Management</h3>
+                <p>MBA, BBA, Executive MBA, Finance, Marketing</p>
+                <div class="program-arrow">Explore →</div>
+            </a>
+            <a href="#" class="program-card">
+                <div class="program-icon" style="background:#FFF8EC">⚖️</div>
+                <h3>Law</h3>
+                <p>BA LLB, BBA LLB, LLM — India's top 25 law school</p>
+                <div class="program-arrow">Explore →</div>
+            </a>
+            <a href="#" class="program-card">
+                <div class="program-icon" style="background:#F3EEFF">🔬</div>
+                <h3>Science & Humanities</h3>
+                <p>B.Sc, M.Sc, Psychology, Economics, English, Physics</p>
+                <div class="program-arrow">Explore →</div>
+            </a>
+            <a href="#" class="program-card">
+                <div class="program-icon" style="background:#E8F9F0">🌾</div>
+                <h3>Agricultural Sciences</h3>
+                <p>B.Sc Agriculture, Food Technology, Horticulture</p>
+                <div class="program-arrow">Explore →</div>
+            </a>
+        </div>
+    </section>
+
+    <!-- STATS STRIP -->
+    <section class="stats-strip">
+        <div class="stats-strip-inner">
+            <div class="stat-item">
+                <div class="stat-val">56K<sup>+</sup></div>
+                <div class="stat-label">Students Enrolled</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-val">3,200<sup>+</sup></div>
+                <div class="stat-label">Faculty Members</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-val">1,800<sup>+</sup></div>
+                <div class="stat-label">Research Publications</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-val">500<sup>+</sup></div>
+                <div class="stat-label">Industry MoUs</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-val">₹45L</div>
+                <div class="stat-label">Highest CTC Placement</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEWS & HIGHLIGHTS -->
+    <section class="highlights">
+        <div class="highlights-inner">
+            <div class="section-header" style="text-align:left; margin-bottom:36px">
+                <div class="section-label">Latest</div>
+                <h2>News & Highlights</h2>
+            </div>
+            <div class="highlights-grid">
+                <div class="news-card-big">
+                    <div class="news-card-bg"></div>
+                    <div class="news-card-content">
+                        <span class="news-tag">Research</span>
+                        <h3>SRM Researchers Develop Breakthrough AI Model for Early Cancer Detection</h3>
+                        <div class="news-meta">April 18, 2026 &nbsp;·&nbsp; 4 min read</div>
+                    </div>
+                </div>
+                <div class="news-small-col">
+                    <div class="news-card-sm">
+                        <span class="news-tag">Admissions</span>
+                        <h3>SRMJEEE 2026 Phase 2 Registration Now Open — Apply by May 15</h3>
+                        <div class="news-meta">April 14, 2026</div>
+                    </div>
+                    <div class="news-card-sm">
+                        <span class="news-tag">Placements</span>
+                        <h3>Record 10,200 Offers Made During 2025–26 Placement Season</h3>
+                        <div class="news-meta">April 10, 2026</div>
+                    </div>
+                </div>
+                <div class="news-small-col">
+                    <div class="news-card-sm">
+                        <span class="news-tag">Ranking</span>
+                        <h3>SRM Moves Up 3 Spots in QS Asia University Rankings 2026</h3>
+                        <div class="news-meta">April 7, 2026</div>
+                    </div>
+                    <div class="news-card-sm">
+                        <span class="news-tag">Events</span>
+                        <h3>Aaruush '26 — Asia's Largest Student-Run Techfest Returns in July</h3>
+                        <div class="news-meta">April 2, 2026</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- QUICK LINKS -->
+    <section class="quicklinks">
+        <div class="quicklinks-inner">
+            <a href="#" class="ql-card">
+                <div class="ql-icon">📚</div>
+                <div class="ql-label">Library</div>
+            </a>
+            <a href="#" class="ql-card">
+                <div class="ql-icon">💼</div>
+                <div class="ql-label">Career Centre</div>
+            </a>
+            <a href="#" class="ql-card">
+                <div class="ql-icon">🏆</div>
+                <div class="ql-label">Placements</div>
+            </a>
+            <a href="#" class="ql-card">
+                <div class="ql-icon">🔬</div>
+                <div class="ql-label">Research</div>
+            </a>
+            <a href="#" class="ql-card">
+                <div class="ql-icon">🌍</div>
+                <div class="ql-label">International</div>
+            </a>
+            <a href="#" class="ql-card">
+                <div class="ql-icon">🎓</div>
+                <div class="ql-label">Alumni</div>
+            </a>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-inner">
+            <div class="footer-top">
+                <div class="footer-brand">
+                    <div class="logo">
+                        <div class="logo-badge">SRM</div>
+                        <div class="logo-text">
+                            <strong>SRM Institute of Science</strong>
+                            <span>and Technology</span>
+                        </div>
+                    </div>
+                    <p>A premier deemed university offering world-class education across engineering, medicine, law, management and sciences — shaping leaders for tomorrow.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Academics</h4>
+                    <a href="#">Engineering & Technology</a>
+                    <a href="#">Medicine & Health Sciences</a>
+                    <a href="#">Management</a>
+                    <a href="#">Law</a>
+                    <a href="#">Science & Humanities</a>
+                    <a href="#">Programme Finder</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Campus</h4>
+                    <a href="#">Kattankulathur – Chennai</a>
+                    <a href="#">Ramapuram – Chennai</a>
+                    <a href="#">Vadapalani – Chennai</a>
+                    <a href="#">Tiruchirappalli</a>
+                    <a href="#">Delhi – NCR</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Useful Links</h4>
+                    <a href="#">Admissions 2026</a>
+                    <a href="#">Library</a>
+                    <a href="#">Career Centre</a>
+                    <a href="#">Research</a>
+                    <a href="#">Placements</a>
+                    <a href="#">Contact Us</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>© 2026 SRM Institute of Science and Technology. All rights reserved.</span>
+                <div>
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Use</a>
+                    <a href="#">Sitemap</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- CHATBOT WIDGET (unchanged) -->
+    <div class="chatbot-widget">
+        <button class="chatbot-button" onclick="openChatbot()">
+            <div class="robot-emoji"></div>
+            <div class="ask-kivy-text">Ask Kivy</div>
+        </button>
+    </div>
+
+    <!-- CHATBOT MODAL (unchanged) -->
+    <div id="chatbotModal" class="chatbot-modal">
+        <div class="chatbot-modal-content">
+            <button class="close-modal" onclick="closeChatbot()">✕</button>
+            <iframe id="chatbot-iframe" src="../kivy_chatbot.html"></iframe>
+        </div>
+    </div>
+
+    <script>
+        function openChatbot() {
+            document.getElementById('chatbotModal').classList.add('active');
+        }
+        function closeChatbot() {
+            document.getElementById('chatbotModal').classList.remove('active');
+        }
+    </script>
+</body>
+</html>

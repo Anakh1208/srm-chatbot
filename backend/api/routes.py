@@ -7,8 +7,41 @@ FastAPI endpoints for the SRM chatbot.
 from fastapi import APIRouter, HTTPException, status, Request
 from fastapi.responses import JSONResponse
 import logging
+import time
 from typing import Optional
 from datetime import datetime
+
+# ADD after imports
+from supabase import create_client, Client
+import os
+
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+supabase = None
+if SUPABASE_URL and SUPABASE_KEY:
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+
+def get_chunks_from_supabase() -> list:
+    """Fetch chunks from Supabase for RAG queries"""
+    try:
+        SUPABASE_URL = os.getenv("SUPABASE_URL")
+        SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+        
+        if not SUPABASE_URL or not SUPABASE_KEY:
+            return []
+        
+        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+        response = supabase.table("documents").select("content").execute()
+        
+        if response.data:
+            return [doc['content'] for doc in response.data]
+        return []
+        
+    except Exception as e:
+        print(f"❌ Supabase fetch failed: {str(e)}")
+        return []
 
 from backend.api.schemas import (
     ChatRequest, 
@@ -78,65 +111,54 @@ async def root():
         }
     }
 
-
-@router.post("/chat", response_model=ChatResponse, status_code=status.HTTP_200_OK)
-async def chat(request: ChatRequest, req: Request):
-
-    if rag_engine is None:
-        logger.error("RAG engine not initialized")
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="RAG engine is not initialized. Please try again later."
-        )
-    
+@router.post("/chat")
+async def chat(request: ChatRequest):
+    """
+    Enhanced chat endpoint with sources, confidence, and follow-ups
+    DEMO-READY VERSION
+    """
     try:
         logger.info(f"📥 Received query: {request.query}")
         
+        # Get RAG response
         result = rag_engine.answer_question(request.query)
-
-        # ✅ Directly use answer (no Groq)
-        conversational_answer = result['answer']
         
-        # Build sources list
-        sources = []
-        for i, source_data in enumerate(result.get('sources', [])):
-            sources.append(Source(
-                title=source_data.get('title', 'SRM Source'),
-                url=source_data.get('url', ''),
-                preview=source_data.get('text', ''),
-                relevance_score=source_data.get('score', 0.0)
-            ))
+        # 🔥 CLEAN OUTPUT
+        import re
+        clean_answer = re.sub(r'http\S+', '', result['answer'])  # remove links
+        clean_answer = clean_answer.split("You can also")[0]     # remove extra junk
         
-        confidence = calculate_confidence(
-            [s.get('score', 1.0) for s in result.get('sources', [])]
-        )
+        # Enhanced response structure for demo
+        response = {
+            'query': request.query,
+            'answer': clean_answer,
+            'suggestions': [
+                "Ask about academic programs",
+                "Learn about admissions process",
+                "Explore campus facilities"
+            ],
+            'confidence': result['confidence'],
+            'has_context': result['has_context'],
+            'sources': result.get('sources', []),
+            'timestamp': str(time.time())
+        }
         
-        response = ChatResponse(
-            answer=conversational_answer,
-            sources=sources,
-            confidence=confidence,
-            has_context=result.get('has_context', False),
-            query=request.query,
-            conversation_id=request.conversation_id
-        )
-        
-        logger.info(f"✅ Query processed successfully. Confidence: {confidence}")
+        logger.info(f"✅ Query processed successfully. Confidence: {result['confidence']}")
         
         return response
-        
-    except ValueError as e:
-        logger.warning(f"⚠️ Validation error: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
-        
+
     except Exception as e:
-        logger.error(f"❌ Error processing query: {str(e)}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error processing your query"
-        )
+        logger.error(f"❌ Error processing query: {str(e)}")
+  
+        return {
+            'query': request.query,
+            'answer': "I encountered an error processing your question. Please try rephrasing or ask something else.",
+            'confidence': 'Error',
+            'has_context': False,
+            'sources': [],
+            'follow_ups': ["General admission process", "Available programs", "Contact information"],
+            'timestamp': str(time.time())
+        }
 
 
 @router.get("/health", response_model=HealthResponse)

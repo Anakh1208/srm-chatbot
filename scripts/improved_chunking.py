@@ -2,6 +2,7 @@
 Improved Chunking Strategy - Fixed for SRM Data
 """
 import json
+import os
 import re
 from typing import List, Dict
 
@@ -72,7 +73,16 @@ def reprocess_data():
     """Reprocess scraped data with improved chunking"""
     print("🔄 Reprocessing data with improved chunking...")
     
-    with open('../data/raw/scraped_data.json', 'r') as f:
+    # ✅ FIX: Use absolute paths (works from anywhere)
+    BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+
+    input_path = os.path.join(BASE_DIR, "data/raw/scraped_data.json")
+    output_path = os.path.join(BASE_DIR, "data/processed/improved_chunks.json")
+    
+    if not os.path.exists(input_path):
+        raise FileNotFoundError(f"❌ Input file not found: {input_path}")
+    
+    with open(input_path, 'r') as f:
         scraped_data = json.load(f)
     
     print(f"📊 Found {len(scraped_data)} pages")
@@ -81,23 +91,25 @@ def reprocess_data():
     all_chunks = []
     
     for page in scraped_data:
-        # Use correct field names: page_title, url, content
         semantic_chunks = chunker.chunk_by_semantic_units(
             text=page['content'],
             metadata={
-                'title': page['page_title'],
-                'url': page['url']
+                'title': page.get('url', 'No Title'),
+                'url': page.get('url', '')
             }
         )
         all_chunks.extend(semantic_chunks)
     
-    with open('../data/processed/improved_chunks.json', 'w') as f:
+    # ✅ Ensure folder exists (using BASE_DIR)
+    processed_dir = os.path.join(BASE_DIR, "data/processed")
+    os.makedirs(processed_dir, exist_ok=True)
+    
+    with open(output_path, 'w') as f:
         json.dump(all_chunks, f, indent=2)
     
     print(f"\n✅ SUCCESS!")
-    print(f"   Previous: 186 chunks")
-    print(f"   New: {len(all_chunks)} chunks")
-    print(f"   Improvement: +{len(all_chunks) - 186} chunks")
+    print(f"   Created: {len(all_chunks)} chunks")
+    print(f"   Saved to: {output_path}")
     
     return all_chunks
 

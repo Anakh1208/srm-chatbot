@@ -243,3 +243,201 @@ class RAGEngine:
         return answer
 
 
+
+
+
+
+
+
+        """
+Enhanced RAG Engine - Anti-hallucination version
+"""
+import os
+import re
+from typing import List, Dict
+
+from .vector_store import FAISSVectorStore
+from .embeddings import EmbeddingsGenerator
+from .prompts import create_answer_prompt, create_no_context_response, get_smart_suggestions
+from .context_cleaner import ContextCleaner
+from .ollama_llm import OllamaLLM
+
+
+def parse_llm_output(text: str):
+    answer = text
+    suggestions = []
+
+    if "Suggestions:" in text:
+        parts = text.split("Suggestions:")
+        answer = parts[0].replace("Answer:", "").strip()
+
+        suggestions_lines = parts[1].strip().split("\n")
+        for line in suggestions_lines:
+            line = line.strip()
+            if line:
+                clean = line.replace("1.", "").replace("2.", "").replace("3.", "").strip()
+                if clean:
+                    suggestions.append(clean)
+
+    return answer.strip(), suggestions[:3]
+
+
+class RAGEngine:
+    def __init__(self, vectorstore_dir: str, top_k: int = 6):
+        self.vectorstore_dir = vectorstore_dir
+        self.vector_store = FAISSVectorStore()
+
+        try:
+            self.vector_store.load_index(vectorstore_dir)
+            print(f"✅ Loaded vector store from {vectorstore_dir}")
+        except Exception as e:
+            print(f"⚠️ Could not load vector store: {str(e)}")
+
+        self.top_k = top_k
+        self.embeddings_generator = EmbeddingsGenerator()
+        self.context_cleaner = ContextCleaner()
+        self.llm = OllamaLLM()
+
+        print("✅ RAG Engine initialized")
+
+    def _is_garbage_chunk(self, text: str) -> bool:
+        if not text or len(text.strip()) < 30:
+            return True
+        if text.count('![') > 3:
+            return True
+        if len(re.findall(r'https?://', text)) > 3:
+            return True
+
+        alpha_ratio = sum(c.isalpha() for c in text) / max(len(text), 1)
+        if alpha_ratio < 0.4:
+            return True
+
+        junk_patterns = ['Previous Next', 'wpcontent/uploads', 'Apply](', '## Glimpse', 'carousel']
+        return any(p in text for p in junk_patterns)
+
+    def _clean_chunk_text(self, text: str) -> str:
+        text = text.replace('Category: qadata', '')
+        text = text.replace('question:', '').replace('answer:', '')
+        text = re.sub(r'!\[.*?\]\(.*?\)', '', text)
+        text = re.sub(r'https?://\S+', '', text)
+        text = text.replace('*', '').replace('_', '')
+        text = re.sub(r'\s+', ' ', text).strip()
+        return text
+
+    def retrieve_relevant_context(self, query: str, top_k: int = None) -> dict:
+        if top_k is None:
+            top_k = self.top_k
+
+        try:
+            query_embedding = self.embeddings_generator.embed([query])[0]
+            results = self.vector_store.search(query_embedding, top_k)
+
+            if not results:
+                return {'has_context': False, 'chunks': [], 'answer': None}
+
+            processed = []
+            for r in results:
+                text = r.get('chunk', '')
+
+                if self._is_garbage_chunk(text):
+                    continue
+
+                clean = self._clean_chunk_text(text)
+                if len(clean) < 30:
+                    continue
+
+                processed.append({
+                    'text': clean,
+                    'score': float(r.get('score', 999.0))
+                })
+
+            if not processed:
+                return {'has_context': False, 'chunks': [], 'answer': None}
+
+            return {'has_context': True, 'chunks': processed, 'answer': None}
+
+        except Exception as e:
+            print(f"❌ Retrieval error: {e}")
+            return {'has_context': False, 'chunks': [], 'answer': None}
+
+    def answer_question(self, query: str) -> dict:
+        try:
+            print(f"\n🔍 QUERY: {query}")
+
+            retrieval = self.retrieve_relevant_context(query)
+
+            if not retrieval['has_context']:
+                return {
+                    'answer': create_no_context_response(query),
+                    'sources': [],
+                    'confidence': 'Low',
+                    'has_context': False,
+                    'follow_ups': get_smart_suggestions(query)
+                }
+
+            clean_context = self.context_cleaner.clean_chunks(
+                retrieval['chunks'], max_context_length=300
+            )
+            clean_context = self.context_cleaner.deduplicate(clean_context)
+
+            answer, suggestions = self._generate_answer(clean_context, query)
+            answer = self._postprocess_answer(answer, clean_context)
+
+            if not suggestions:
+                suggestions = get_smart_suggestions(query)
+
+            return {
+                'answer': answer,
+                'sources': [],
+                'confidence': 'High',
+                'has_context': True,
+                'follow_ups': suggestions
+            }
+
+        except Exception as e:
+            print(f"❌ ERROR: {e}")
+            import traceback
+            traceback.print_exc()
+
+            return {
+                'answer': create_no_context_response(query),
+                'sources': [],
+                'confidence': 'Error',
+                'has_context': False,
+                'follow_ups': get_smart_suggestions(query)
+            }
+
+    def _generate_answer(self, context: str, query: str):
+        if not context or len(context.strip()) < 20:
+            return create_no_context_response(query), []
+
+        prompt = create_answer_prompt(query, context)
+
+        try:
+            raw = self.llm.generate(prompt)
+
+            if not raw:
+                return create_no_context_response(query), []
+
+            answer, suggestions = parse_llm_output(raw)
+            return answer, suggestions
+
+        except Exception as e:
+            print(f"❌ LLM Error: {e}")
+            return create_no_context_response(query), []
+
+    def _postprocess_answer(self, answer: str, context: str) -> str:
+        if "don't have accurate information" in answer.lower():
+            return answer
+
+        patterns = [
+            r'\d+\s*(offers|students|lakh|crore|companies)',
+            r'https?://\S+'
+        ]
+
+        for p in patterns:
+            if re.search(p, answer, re.IGNORECASE) and not re.search(p, context):
+                return create_no_context_response("")
+
+        answer = re.split(r'You can also[:\-]', answer, flags=re.IGNORECASE)[0].strip()
+        return answer
